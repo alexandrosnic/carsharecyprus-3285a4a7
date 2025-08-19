@@ -444,7 +444,12 @@ const MyTrips = () => {
                             <div className="text-lg font-bold text-muted-foreground">
                               €{trip.type === 'passenger' ? trip.total_amount?.toFixed(2) : trip.price_per_seat}
                             </div>
-                            <Button size="sm" variant="outline" className="mt-2">
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              className="mt-2"
+                              onClick={() => navigate(`/rate/${trip.id}`)}
+                            >
                               Rate {trip.type === 'driver' ? 'Passenger' : 'Driver'}
                             </Button>
                           </div>
