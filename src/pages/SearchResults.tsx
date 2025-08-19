@@ -17,7 +17,11 @@ interface Ride {
   available_seats: number;
   price_per_seat: number;
   description: string;
-  profiles: {
+  driver_id: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+  driver_profile?: {
     full_name: string;
     avatar_url: string;
     rating: number;
@@ -48,15 +52,7 @@ const SearchResults = () => {
       setLoading(true);
       let query = supabase
         .from('rides')
-        .select(`
-          *,
-          profiles!rides_driver_id_fkey (
-            full_name,
-            avatar_url,
-            rating,
-            total_rides
-          )
-        `)
+        .select('*')
         .eq('status', 'active')
         .gte('available_seats', passengers);
 
@@ -90,12 +86,27 @@ const SearchResults = () => {
 
       let processedRides = data || [];
 
-      // Sort by rating if selected (done in frontend since it's a joined field)
-      if (sortBy === 'rating') {
-        processedRides.sort((a, b) => (b.profiles?.rating || 0) - (a.profiles?.rating || 0));
+      // Fetch driver profiles for each ride
+      if (processedRides.length > 0) {
+        const driverIds = [...new Set(processedRides.map(ride => ride.driver_id))];
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('user_id, full_name, avatar_url, rating, total_rides')
+          .in('user_id', driverIds);
+
+        // Attach driver profiles to rides
+        processedRides = processedRides.map(ride => ({
+          ...ride,
+          driver_profile: profiles?.find(p => p.user_id === ride.driver_id)
+        })) as Ride[];
       }
 
-      setRides(processedRides);
+      // Sort by rating if selected
+      if (sortBy === 'rating') {
+        (processedRides as Ride[]).sort((a, b) => (b.driver_profile?.rating || 0) - (a.driver_profile?.rating || 0));
+      }
+
+      setRides(processedRides as Ride[]);
     } catch (error: any) {
       console.error('Error fetching rides:', error);
       toast.error('Failed to load rides');
@@ -236,19 +247,19 @@ const SearchResults = () => {
                     {/* Driver Info */}
                     <div className="flex items-center space-x-4">
                       <div className="text-right">
-                        <div className="font-medium">{ride.profiles?.full_name}</div>
+                        <div className="font-medium">{ride.driver_profile?.full_name || 'Unknown Driver'}</div>
                         <div className="flex items-center space-x-1 text-sm">
                           <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                          <span>{ride.profiles?.rating?.toFixed(1) || '5.0'}</span>
+                          <span>{ride.driver_profile?.rating?.toFixed(1) || '5.0'}</span>
                           <span className="text-muted-foreground">
-                            • {ride.profiles?.total_rides || 0} trips
+                            • {ride.driver_profile?.total_rides || 0} trips
                           </span>
                         </div>
                       </div>
                       <Avatar>
-                        <AvatarImage src={ride.profiles?.avatar_url} />
+                        <AvatarImage src={ride.driver_profile?.avatar_url} />
                         <AvatarFallback>
-                          {ride.profiles?.full_name?.split(' ').map(n => n[0]).join('') || 'D'}
+                          {ride.driver_profile?.full_name?.split(' ').map(n => n[0]).join('') || 'D'}
                         </AvatarFallback>
                       </Avatar>
                     </div>
