@@ -244,17 +244,26 @@ const Profile = () => {
             </CardContent>
           </Card>
 
-          {/* Payment Methods (Placeholder) */}
+          {/* Payment Methods */}
           <Card>
             <CardHeader>
               <CardTitle>Payment Methods</CardTitle>
               <CardDescription>Manage your payment methods for rides</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-8 text-muted-foreground">
-                <Car className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>Payment methods will be available soon</p>
-                <p className="text-sm">PayPal, Stripe, and card payments coming soon</p>
+              <div className="space-y-4">
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start"
+                  onClick={() => navigate('/payment-history')}
+                >
+                  View Payment History
+                </Button>
+                <div className="text-center py-4 text-muted-foreground">
+                  <Car className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                  <p className="text-sm">Payment methods will be available soon</p>
+                  <p className="text-xs">PayPal, Stripe, and card payments coming soon</p>
+                </div>
               </div>
             </CardContent>
           </Card>

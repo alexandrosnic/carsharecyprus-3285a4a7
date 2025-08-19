@@ -123,8 +123,7 @@ const RideDetails = () => {
       toast.error('Please sign in to chat with driver');
       return;
     }
-    // Navigate to chat - will implement later
-    toast.info('Chat feature coming soon!');
+    navigate(`/chat/${ride?.id}`);
   };
 
   if (loading) {

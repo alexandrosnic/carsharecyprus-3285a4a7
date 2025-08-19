@@ -14,6 +14,8 @@ import RideDetails from "./pages/RideDetails";
 import BookRide from "./pages/BookRide";
 import MyTrips from "./pages/MyTrips";
 import RatingPage from "./pages/RatingPage";
+import Chat from "./pages/Chat";
+import PaymentHistory from "./pages/PaymentHistory";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,6 +38,8 @@ const App = () => (
             <Route path="/book-ride/:rideId" element={<BookRide />} />
             <Route path="/my-trips" element={<MyTrips />} />
             <Route path="/rate/:rideId" element={<RatingPage />} />
+            <Route path="/chat/:rideId" element={<Chat />} />
+            <Route path="/payment-history" element={<PaymentHistory />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
