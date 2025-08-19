@@ -14,7 +14,134 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      bookings: {
+        Row: {
+          commission_amount: number
+          created_at: string
+          driver_amount: number
+          id: string
+          passenger_id: string
+          ride_id: string
+          seats_booked: number
+          status: string | null
+          stripe_payment_intent_id: string | null
+          total_amount: number
+          updated_at: string
+        }
+        Insert: {
+          commission_amount: number
+          created_at?: string
+          driver_amount: number
+          id?: string
+          passenger_id: string
+          ride_id: string
+          seats_booked: number
+          status?: string | null
+          stripe_payment_intent_id?: string | null
+          total_amount: number
+          updated_at?: string
+        }
+        Update: {
+          commission_amount?: number
+          created_at?: string
+          driver_amount?: number
+          id?: string
+          passenger_id?: string
+          ride_id?: string
+          seats_booked?: number
+          status?: string | null
+          stripe_payment_intent_id?: string | null
+          total_amount?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_ride_id_fkey"
+            columns: ["ride_id"]
+            isOneToOne: false
+            referencedRelation: "rides"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          full_name: string
+          id: string
+          phone_number: string | null
+          rating: number | null
+          total_rides: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name: string
+          id?: string
+          phone_number?: string | null
+          rating?: number | null
+          total_rides?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string
+          id?: string
+          phone_number?: string | null
+          rating?: number | null
+          total_rides?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      rides: {
+        Row: {
+          arrival_city: string
+          available_seats: number
+          created_at: string
+          departure_city: string
+          departure_time: string
+          description: string | null
+          driver_id: string
+          id: string
+          price_per_seat: number
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          arrival_city: string
+          available_seats: number
+          created_at?: string
+          departure_city: string
+          departure_time: string
+          description?: string | null
+          driver_id: string
+          id?: string
+          price_per_seat: number
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          arrival_city?: string
+          available_seats?: number
+          created_at?: string
+          departure_city?: string
+          departure_time?: string
+          description?: string | null
+          driver_id?: string
+          id?: string
+          price_per_seat?: number
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
