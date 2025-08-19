@@ -77,7 +77,7 @@ const Index = () => {
             <p className="text-muted-foreground mb-6">
               Share your journey and earn money while helping others
             </p>
-            <Button size="lg" className="w-full">
+            <Button size="lg" className="w-full" onClick={() => navigate('/register-ride')}>
               Create Ride
             </Button>
           </div>
