@@ -47,7 +47,7 @@ const Index = () => {
           </div>
           <div className="flex items-center space-x-4">
             <NotificationCenter />
-            <Button variant="ghost" size="sm">
+            <Button variant="ghost" size="sm" onClick={() => navigate('/profile')}>
               <User className="h-4 w-4 mr-2" />
               {user.email}
             </Button>
@@ -88,7 +88,7 @@ const Index = () => {
             <p className="text-muted-foreground mb-6">
               Search for rides to your destination at great prices
             </p>
-            <Button size="lg" variant="outline" className="w-full">
+            <Button size="lg" variant="outline" className="w-full" onClick={() => navigate('/find-ride')}>
               Search Rides
             </Button>
           </div>
