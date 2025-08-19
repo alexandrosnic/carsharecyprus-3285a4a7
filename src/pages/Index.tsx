@@ -3,10 +3,17 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Car, Plus, Search, User } from 'lucide-react';
+import { NotificationCenter } from '@/components/notifications/NotificationCenter';
+import { useNotifications } from '@/hooks/useNotifications';
 
 const Index = () => {
   const { user, loading, signOut } = useAuth();
   const navigate = useNavigate();
+  const { 
+    showDriverAcceptedNotification, 
+    showWaitingForDriverNotification,
+    showPaymentReceivedNotification 
+  } = useNotifications();
 
   useEffect(() => {
     if (!loading && !user) {
@@ -39,6 +46,7 @@ const Index = () => {
             <h1 className="text-2xl font-bold text-foreground">Carpool Cyprus</h1>
           </div>
           <div className="flex items-center space-x-4">
+            <NotificationCenter />
             <Button variant="ghost" size="sm">
               <User className="h-4 w-4 mr-2" />
               {user.email}
@@ -92,6 +100,34 @@ const Index = () => {
           <div className="text-center py-12 text-muted-foreground">
             <Car className="h-12 w-12 mx-auto mb-4 opacity-50" />
             <p>No rides yet. Create your first ride or search for available ones!</p>
+          </div>
+        </div>
+
+        {/* Test Notification Buttons - Remove these in production */}
+        <div className="mt-8 p-4 bg-muted rounded-lg">
+          <h4 className="text-lg font-semibold mb-4">Test Notifications:</h4>
+          <div className="flex gap-2 flex-wrap">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={showDriverAcceptedNotification}
+            >
+              Test "Driver Accepted"
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={showWaitingForDriverNotification}
+            >
+              Test "Wait for Driver"
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => showPaymentReceivedNotification('€15.00')}
+            >
+              Test "Payment Received"
+            </Button>
           </div>
         </div>
       </main>
