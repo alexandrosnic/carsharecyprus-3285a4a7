@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
-import { Eye, EyeOff, Mail, Lock, User, Car, Chrome, Facebook } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User, Car, Chrome } from 'lucide-react';
 import { toast } from 'sonner';
 
 const Auth = () => {
@@ -42,18 +42,6 @@ const Auth = () => {
     }
   };
 
-  const handleFacebookSignIn = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'facebook',
-      options: {
-        redirectTo: `${window.location.origin}/`
-      }
-    });
-
-    if (error) {
-      toast.error('Failed to sign in with Facebook: ' + error.message);
-    }
-  };
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -118,15 +106,6 @@ const Auth = () => {
             >
               <Chrome className="h-4 w-4 mr-2" />
               Continue with Google
-            </Button>
-            <Button 
-              variant="outline" 
-              className="w-full" 
-              onClick={handleFacebookSignIn}
-              disabled={loading}
-            >
-              <Facebook className="h-4 w-4 mr-2" />
-              Continue with Facebook
             </Button>
           </div>
 
