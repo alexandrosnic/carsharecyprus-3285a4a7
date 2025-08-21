@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { ArrowLeft, MapPin, Clock, Users, Star, Phone, MessageCircle, Car, DollarSign } from 'lucide-react';
 import { toast } from 'sonner';
+import Map from '@/components/Map';
 
 interface RideDetails {
   id: string;
@@ -291,6 +292,22 @@ const RideDetails = () => {
                   </CardContent>
                 </Card>
               )}
+
+              {/* Route Map */}
+              <Card className="mt-6">
+                <CardHeader>
+                  <CardTitle>Route Overview</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Map 
+                    className="w-full h-64 rounded-lg"
+                    markers={[
+                      { coordinates: [33.3792, 35.1872], title: ride.departure_city, description: "Departure" },
+                      { coordinates: [33.0572, 34.7582], title: ride.arrival_city, description: "Arrival" }
+                    ]}
+                  />
+                </CardContent>
+              </Card>
             </div>
 
             {/* Booking Section */}

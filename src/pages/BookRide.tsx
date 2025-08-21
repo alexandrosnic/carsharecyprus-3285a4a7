@@ -11,6 +11,7 @@ import { Separator } from '@/components/ui/separator';
 import { ArrowLeft, MapPin, Clock, Users, DollarSign, CreditCard, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import { useNotifications } from '@/hooks/useNotifications';
+import Map from '@/components/Map';
 
 interface RideBookingData {
   id: string;
@@ -147,10 +148,27 @@ const BookRide = () => {
 
       if (updateError) throw updateError;
 
+      // Create payment session
+      const { data: paymentData, error: paymentError } = await supabase.functions
+        .invoke('create-payment', {
+          body: {
+            bookingId: bookingData.id,
+            amount: totalAmount,
+            description: `Carpool from ${ride.departure_city} to ${ride.arrival_city}`
+          }
+        });
+
+      if (paymentError) throw paymentError;
+
+      // Redirect to Stripe Checkout
+      if (paymentData?.url) {
+        window.open(paymentData.url, '_blank');
+      }
+
       // Show notification
       showWaitingForDriverNotification();
 
-      toast.success('Booking request sent! Waiting for driver approval.');
+      toast.success('Booking created! Complete payment to confirm.');
       navigate('/my-trips');
     } catch (error: any) {
       console.error('Error creating booking:', error);
@@ -275,6 +293,22 @@ const BookRide = () => {
               </CardContent>
             </Card>
 
+            {/* Map */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Route Overview</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Map 
+                  className="w-full h-64 rounded-lg"
+                  markers={[
+                    { coordinates: [33.3792, 35.1872], title: ride.departure_city, description: "Departure" },
+                    { coordinates: [33.0572, 34.7582], title: ride.arrival_city, description: "Arrival" }
+                  ]}
+                />
+              </CardContent>
+            </Card>
+
             {/* Payment Information */}
             <Card>
               <CardHeader>
@@ -283,9 +317,9 @@ const BookRide = () => {
               <CardContent className="space-y-4">
                 <div className="text-center py-8 text-muted-foreground">
                   <CreditCard className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p className="font-medium">Payment methods coming soon</p>
-                  <p className="text-sm">PayPal, Stripe, and card payments will be available</p>
-                  <p className="text-sm mt-2">For now, payment will be handled directly with the driver</p>
+                  <p className="font-medium">Secure payment with Stripe</p>
+                  <p className="text-sm">Complete your booking with a secure card payment</p>
+                  <p className="text-sm mt-2">Payment processed after driver approval</p>
                 </div>
               </CardContent>
             </Card>
@@ -338,8 +372,8 @@ const BookRide = () => {
                 
                 <div className="text-xs text-muted-foreground space-y-1">
                   <p>• Your booking request will be sent to the driver</p>
-                  <p>• Payment will be arranged directly with the driver</p>
-                  <p>• You'll receive a notification when the driver responds</p>
+                  <p>• You'll be redirected to secure payment</p>
+                  <p>• Payment processed only after driver approval</p>
                 </div>
               </CardContent>
             </Card>
