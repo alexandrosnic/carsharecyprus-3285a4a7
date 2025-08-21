@@ -160,6 +160,18 @@ const BookRide = () => {
 
       if (paymentError) throw paymentError;
 
+      // Send booking confirmation email
+      try {
+        await supabase.functions.invoke('send-notification-email', {
+          body: {
+            type: 'booking_confirmation',
+            bookingId: bookingData.id
+          }
+        });
+      } catch (emailError) {
+        console.error('Failed to send confirmation email:', emailError);
+      }
+
       // Redirect to Stripe Checkout
       if (paymentData?.url) {
         window.open(paymentData.url, '_blank');
