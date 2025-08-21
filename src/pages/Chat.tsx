@@ -59,6 +59,32 @@ const Chat = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  // Set up real-time message updates
+  useEffect(() => {
+    if (!user || !rideId) return;
+
+    const channel = supabase
+      .channel('chat-messages')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'messages',
+          filter: `ride_id=eq.${rideId}`
+        },
+        (payload) => {
+          console.log('New message received:', payload);
+          setMessages(current => [...current, payload.new as Message]);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, rideId]);
+
   const fetchChatInfo = async () => {
     if (!user) return;
 

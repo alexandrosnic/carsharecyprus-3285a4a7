@@ -1,6 +1,8 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface MapProps {
   className?: string;
@@ -21,13 +23,33 @@ const Map: React.FC<MapProps> = ({
 }) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
+  const [mapboxToken, setMapboxToken] = useState<string | null>(null);
+  const [tokenError, setTokenError] = useState<string | null>(null);
+  const { session } = useAuth();
 
+  // Fetch Mapbox token
   useEffect(() => {
-    if (!mapContainer.current) return;
+    const fetchMapboxToken = async () => {
+      if (!session) return;
+      
+      try {
+        const { data, error } = await supabase.functions.invoke('get-mapbox-token');
+        if (error) throw error;
+        setMapboxToken(data.token);
+      } catch (error: any) {
+        console.error('Error fetching Mapbox token:', error);
+        setTokenError('Failed to load map token');
+      }
+    };
 
-    // You'll need to get your Mapbox token from https://mapbox.com/
-    // For now, using a placeholder - users need to add their token
-    mapboxgl.accessToken = 'pk.eyJ1IjoiY2FycG9vbC1jeXBydXMiLCJhIjoiY2x3ZXh5eDAwMGZqNzJrcGRzZjRxZXBhbiJ9.placeholder';
+    fetchMapboxToken();
+  }, [session]);
+
+  // Initialize map
+  useEffect(() => {
+    if (!mapContainer.current || !mapboxToken) return;
+
+    mapboxgl.accessToken = mapboxToken;
     
     try {
       map.current = new mapboxgl.Map({
@@ -54,27 +76,45 @@ const Map: React.FC<MapProps> = ({
       });
 
     } catch (error) {
-      console.warn('Map initialization failed. Please add your Mapbox token.');
-      // Fallback: show a placeholder
-      if (mapContainer.current) {
-        mapContainer.current.innerHTML = `
-          <div class="flex items-center justify-center h-full bg-muted rounded-lg">
-            <div class="text-center p-4">
-              <p class="text-muted-foreground">Map requires Mapbox token</p>
-              <p class="text-sm text-muted-foreground mt-2">
-                Get your token from <a href="https://mapbox.com/" target="_blank" class="text-primary underline">mapbox.com</a>
-              </p>
-            </div>
-          </div>
-        `;
-      }
+      console.error('Map initialization failed:', error);
+      setTokenError('Map initialization failed');
     }
 
     // Cleanup
     return () => {
       map.current?.remove();
     };
-  }, [center, zoom, markers]);
+  }, [center, zoom, markers, mapboxToken]);
+
+  // Show loading or error state
+  if (!session) {
+    return (
+      <div className={`${className} flex items-center justify-center bg-muted rounded-lg`}>
+        <p className="text-muted-foreground">Please log in to view maps</p>
+      </div>
+    );
+  }
+
+  if (tokenError) {
+    return (
+      <div className={`${className} flex items-center justify-center bg-muted rounded-lg`}>
+        <div className="text-center p-4">
+          <p className="text-muted-foreground">{tokenError}</p>
+          <p className="text-sm text-muted-foreground mt-2">
+            Check your Mapbox configuration
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!mapboxToken) {
+    return (
+      <div className={`${className} flex items-center justify-center bg-muted rounded-lg`}>
+        <p className="text-muted-foreground">Loading map...</p>
+      </div>
+    );
+  }
 
   return <div ref={mapContainer} className={className} />;
 };
