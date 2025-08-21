@@ -86,11 +86,11 @@ const SearchResults = () => {
 
       let processedRides = data || [];
 
-      // Fetch driver profiles for each ride
+      // Fetch driver profiles for each ride (using public view)
       if (processedRides.length > 0) {
         const driverIds = [...new Set(processedRides.map(ride => ride.driver_id))];
         const { data: profiles } = await supabase
-          .from('profiles')
+          .from('public_profiles')
           .select('user_id, full_name, avatar_url, rating, total_rides')
           .in('user_id', driverIds);
 

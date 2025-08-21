@@ -60,10 +60,10 @@ const BookRide = () => {
 
       if (rideError) throw rideError;
 
-      // Get driver profile
+      // Get driver profile (using public view for security)
       const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('full_name, phone_number')
+        .from('public_profiles')
+        .select('full_name')
         .eq('user_id', rideData.driver_id)
         .single();
 

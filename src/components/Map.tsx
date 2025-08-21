@@ -47,7 +47,7 @@ const Map: React.FC<MapProps> = ({
             .setLngLat(marker.coordinates)
             .setPopup(
               new mapboxgl.Popup({ offset: 25 })
-                .setHTML(`<h3>${marker.title}</h3>${marker.description ? `<p>${marker.description}</p>` : ''}`)
+                .setText(`${marker.title}${marker.description ? ` - ${marker.description}` : ''}`)
             )
             .addTo(map.current);
         }

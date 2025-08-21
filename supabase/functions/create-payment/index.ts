@@ -27,8 +27,46 @@ serve(async (req) => {
     const user = data.user;
     if (!user?.email) throw new Error("User not authenticated or email not available");
 
-    // Get request data
-    const { bookingId, amount, description } = await req.json();
+    // Get request data and validate
+    const body = await req.json();
+    const { bookingId, amount, description } = body;
+
+    // Server-side validation
+    if (!bookingId || typeof bookingId !== 'string') {
+      throw new Error('Invalid booking ID');
+    }
+    
+    if (!amount || typeof amount !== 'number' || amount <= 0) {
+      throw new Error('Invalid amount');
+    }
+
+    // Create Supabase service client to validate booking
+    const supabaseService = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+      { auth: { persistSession: false } }
+    );
+
+    // Validate booking exists and belongs to the authenticated user
+    const { data: booking, error: bookingError } = await supabaseService
+      .from("bookings")
+      .select(`
+        *,
+        rides!inner(price_per_seat, driver_id)
+      `)
+      .eq("id", bookingId)
+      .eq("passenger_id", user.id)
+      .single();
+
+    if (bookingError || !booking) {
+      throw new Error('Booking not found or access denied');
+    }
+
+    // Validate the payment amount matches the booking
+    const expectedAmount = booking.total_amount;
+    if (Math.abs(amount - expectedAmount) > 0.01) {
+      throw new Error(`Payment amount mismatch. Expected: ${expectedAmount}, received: ${amount}`);
+    }
 
     // Initialize Stripe
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
@@ -42,7 +80,7 @@ serve(async (req) => {
       customerId = customers.data[0].id;
     }
 
-    // Create a one-time payment session
+    // Create a one-time payment session with validated data
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
@@ -50,8 +88,11 @@ serve(async (req) => {
         {
           price_data: {
             currency: "eur",
-            product_data: { name: description || "Carpool Ride Payment" },
-            unit_amount: Math.round(amount * 100), // Convert to cents
+            product_data: { 
+              name: description || `Carpool Ride: ${booking.rides.driver_id}`,
+              description: `Booking ID: ${bookingId}`
+            },
+            unit_amount: Math.round(expectedAmount * 100), // Use validated amount
           },
           quantity: 1,
         },
@@ -62,17 +103,11 @@ serve(async (req) => {
       metadata: {
         booking_id: bookingId,
         user_id: user.id,
+        validated_amount: expectedAmount.toString(),
       },
     });
 
-    // Create Supabase service client to update booking
-    const supabaseService = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-      { auth: { persistSession: false } }
-    );
-
-    // Update booking with Stripe session ID
+    // Update booking with Stripe session ID (service client already created above)
     await supabaseService
       .from("bookings")
       .update({ 

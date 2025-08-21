@@ -95,10 +95,10 @@ const Chat = () => {
         userRole = 'passenger';
       }
 
-      // Get other user's profile
+      // Get other user's profile (using public view for security)
       const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('user_id, full_name, avatar_url, phone_number')
+        .from('public_profiles')
+        .select('user_id, full_name, avatar_url')
         .eq('user_id', otherUserId)
         .single();
 

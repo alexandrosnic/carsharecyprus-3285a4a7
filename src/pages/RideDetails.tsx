@@ -58,10 +58,10 @@ const RideDetails = () => {
 
       if (rideError) throw rideError;
 
-      // Then get the driver profile
+      // Then get the driver profile (using public view)
       const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('user_id, full_name, avatar_url, rating, total_rides, phone_number')
+        .from('public_profiles')
+        .select('user_id, full_name, avatar_url, rating, total_rides')
         .eq('user_id', rideData.driver_id)
         .single();
 
