@@ -362,7 +362,10 @@ export type Database = {
       }
     }
     Functions: {
-      [_ in never]: never
+      decrement_seats: {
+        Args: { ride_id: string; seats_to_book: number }
+        Returns: number
+      }
     }
     Enums: {
       [_ in never]: never
