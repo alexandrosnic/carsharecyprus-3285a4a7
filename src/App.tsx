@@ -16,6 +16,8 @@ import MyTrips from "./pages/MyTrips";
 import RatingPage from "./pages/RatingPage";
 import Chat from "./pages/Chat";
 import PaymentHistory from "./pages/PaymentHistory";
+import DriverVerification from "./pages/DriverVerification";
+import DisputeResolution from "./pages/DisputeResolution";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,6 +33,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/driver-verification" element={<DriverVerification />} />
             <Route path="/find-ride" element={<FindRide />} />
             <Route path="/search-results" element={<SearchResults />} />
             <Route path="/register-ride" element={<RegisterRide />} />
@@ -40,6 +43,7 @@ const App = () => (
             <Route path="/rate/:rideId" element={<RatingPage />} />
             <Route path="/chat/:rideId" element={<Chat />} />
             <Route path="/payment-history" element={<PaymentHistory />} />
+            <Route path="/dispute" element={<DisputeResolution />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

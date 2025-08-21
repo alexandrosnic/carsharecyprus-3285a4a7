@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { ArrowLeft, Camera, Star, Car, User, Phone, Mail, Save } from 'lucide-react';
+import { ArrowLeft, Camera, Star, Car, User, Phone, Mail, Save, Shield } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
@@ -252,6 +252,15 @@ const Profile = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
+                <Button 
+                  variant="outline" 
+                  onClick={() => navigate('/driver-verification')}
+                  className="w-full"
+                >
+                  <Shield className="h-4 w-4 mr-2" />
+                  Driver Verification
+                </Button>
+                
                 <Button 
                   variant="outline" 
                   className="w-full justify-start"

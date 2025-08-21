@@ -64,6 +64,99 @@ export type Database = {
           },
         ]
       }
+      disputes: {
+        Row: {
+          admin_notes: string | null
+          booking_id: string
+          complainant_id: string
+          created_at: string
+          description: string
+          dispute_type: string
+          evidence_urls: string[] | null
+          id: string
+          resolution: string | null
+          resolved_at: string | null
+          respondent_id: string
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          booking_id: string
+          complainant_id: string
+          created_at?: string
+          description: string
+          dispute_type: string
+          evidence_urls?: string[] | null
+          id?: string
+          resolution?: string | null
+          resolved_at?: string | null
+          respondent_id: string
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          booking_id?: string
+          complainant_id?: string
+          created_at?: string
+          description?: string
+          dispute_type?: string
+          evidence_urls?: string[] | null
+          id?: string
+          resolution?: string | null
+          resolved_at?: string | null
+          respondent_id?: string
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      driver_verifications: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          driver_id: string
+          id: string
+          insurance_document_url: string | null
+          license_image_url: string | null
+          license_number: string | null
+          updated_at: string
+          vehicle_image_url: string | null
+          vehicle_registration: string | null
+          verification_status: string | null
+          verified_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          driver_id: string
+          id?: string
+          insurance_document_url?: string | null
+          license_image_url?: string | null
+          license_number?: string | null
+          updated_at?: string
+          vehicle_image_url?: string | null
+          vehicle_registration?: string | null
+          verification_status?: string | null
+          verified_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          driver_id?: string
+          id?: string
+          insurance_document_url?: string | null
+          license_image_url?: string | null
+          license_number?: string | null
+          updated_at?: string
+          vehicle_image_url?: string | null
+          vehicle_registration?: string | null
+          verification_status?: string | null
+          verified_at?: string | null
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           created_at: string
@@ -125,6 +218,36 @@ export type Database = {
           phone_number?: string | null
           rating?: number | null
           total_rides?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      push_tokens: {
+        Row: {
+          active: boolean | null
+          created_at: string
+          id: string
+          platform: string
+          token: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          active?: boolean | null
+          created_at?: string
+          id?: string
+          platform: string
+          token: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          active?: boolean | null
+          created_at?: string
+          id?: string
+          platform?: string
+          token?: string
           updated_at?: string
           user_id?: string
         }
