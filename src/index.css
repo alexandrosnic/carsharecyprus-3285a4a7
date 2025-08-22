@@ -8,89 +8,95 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* ColorHunt Palette: FFF7D4, FFD95A, C07F00, 4C3D3D */
+    --background: 48 100% 91%; /* #FFF7D4 - Light cream */
+    --foreground: 0 11% 27%; /* #4C3D3D - Dark brown */
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 48 100% 94%; /* Slightly lighter cream for cards */
+    --card-foreground: 0 11% 27%; /* #4C3D3D - Dark brown */
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 48 100% 96%; /* Very light cream for popovers */
+    --popover-foreground: 0 11% 27%; /* #4C3D3D - Dark brown */
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 44 100% 67%; /* #FFD95A - Golden yellow */
+    --primary-foreground: 0 11% 27%; /* #4C3D3D - Dark brown */
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 40 100% 38%; /* #C07F00 - Orange brown */
+    --secondary-foreground: 48 100% 91%; /* #FFF7D4 - Light cream */
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 48 50% 85%; /* Muted cream */
+    --muted-foreground: 0 11% 50%; /* Lighter dark brown */
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 44 80% 75%; /* Lighter golden yellow */
+    --accent-foreground: 0 11% 27%; /* #4C3D3D - Dark brown */
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 84% 60%; /* Red for errors */
+    --destructive-foreground: 48 100% 91%; /* Light cream */
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 48 30% 80%; /* Subtle cream border */
+    --input: 48 50% 88%; /* Input background */
+    --ring: 44 100% 67%; /* Golden yellow focus ring */
 
-    --radius: 0.5rem;
+    --radius: 0.75rem; /* Slightly more rounded for warmth */
 
-    --sidebar-background: 0 0% 98%;
+    /* Custom gradients using the palette */
+    --gradient-warm: linear-gradient(135deg, hsl(48 100% 91%), hsl(44 100% 67%));
+    --gradient-sunset: linear-gradient(135deg, hsl(44 100% 67%), hsl(40 100% 38%));
+    --gradient-earth: linear-gradient(135deg, hsl(40 100% 38%), hsl(0 11% 27%));
 
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-background: 48 100% 94%;
+    --sidebar-foreground: 0 11% 27%;
+    --sidebar-primary: 44 100% 67%;
+    --sidebar-primary-foreground: 0 11% 27%;
+    --sidebar-accent: 40 100% 38%;
+    --sidebar-accent-foreground: 48 100% 91%;
+    --sidebar-border: 48 30% 75%;
+    --sidebar-ring: 44 100% 67%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    /* Dark mode with warmer tones */
+    --background: 0 11% 15%; /* Darker version of dark brown */
+    --foreground: 48 100% 91%; /* Light cream for text */
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 0 11% 20%; /* Slightly lighter dark for cards */
+    --card-foreground: 48 100% 91%; /* Light cream */
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 0 11% 18%; /* Dark popover background */
+    --popover-foreground: 48 100% 91%; /* Light cream */
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 44 100% 67%; /* Keep golden yellow as primary */
+    --primary-foreground: 0 11% 15%; /* Dark background */
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 40 100% 38%; /* Orange brown secondary */
+    --secondary-foreground: 48 100% 91%; /* Light cream */
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 0 11% 25%; /* Muted dark */
+    --muted-foreground: 48 50% 70%; /* Muted light */
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 44 80% 55%; /* Slightly darker golden */
+    --accent-foreground: 0 11% 15%; /* Dark background */
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 84% 60%; /* Red for errors */
+    --destructive-foreground: 48 100% 91%; /* Light cream */
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --border: 0 11% 30%; /* Dark border */
+    --input: 0 11% 25%; /* Dark input background */
+    --ring: 44 100% 67%; /* Golden yellow focus ring */
+
+    /* Dark mode gradients */
+    --gradient-warm: linear-gradient(135deg, hsl(0 11% 20%), hsl(44 80% 45%));
+    --gradient-sunset: linear-gradient(135deg, hsl(44 80% 45%), hsl(40 80% 30%));
+    --gradient-earth: linear-gradient(135deg, hsl(40 80% 30%), hsl(0 11% 15%));
+
+    --sidebar-background: 0 11% 18%;
+    --sidebar-foreground: 48 100% 91%;
+    --sidebar-primary: 44 100% 67%;
+    --sidebar-primary-foreground: 0 11% 15%;
+    --sidebar-accent: 40 100% 38%;
+    --sidebar-accent-foreground: 48 100% 91%;
+    --sidebar-border: 0 11% 30%;
+    --sidebar-ring: 44 100% 67%;
   }
 }
 

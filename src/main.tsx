@@ -30,7 +30,7 @@ document.head.appendChild(viewportMeta);
 // Theme Color Meta Tags
 const themeColorMeta = document.createElement('meta');
 themeColorMeta.name = 'theme-color';
-themeColorMeta.content = '#667eea';
+themeColorMeta.content = '#FFD95A'; // Golden yellow from our palette
 document.head.appendChild(themeColorMeta);
 
 const appleStatusBarMeta = document.createElement('meta');
