@@ -89,7 +89,7 @@ const Auth = () => {
         <CardHeader className="text-center">
           <div className="flex items-center justify-center mb-4">
             <Car className="h-8 w-8 text-primary mr-2" />
-            <CardTitle className="text-2xl">Carpool Cyprus</CardTitle>
+            <CardTitle className="text-2xl">Car Share Cyprus</CardTitle>
           </div>
           <CardDescription>
             Join our community and start sharing rides across Cyprus

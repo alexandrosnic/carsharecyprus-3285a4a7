@@ -43,7 +43,7 @@ const Index = () => {
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <Car className="h-8 w-8 text-primary" />
-            <h1 className="text-2xl font-bold text-foreground">Carpool Cyprus</h1>
+            <h1 className="text-2xl font-bold text-foreground">Car Share Cyprus</h1>
           </div>
           <div className="flex items-center space-x-4">
             <NotificationCenter />
