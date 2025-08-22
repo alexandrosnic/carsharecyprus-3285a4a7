@@ -112,6 +112,44 @@ export type Database = {
         }
         Relationships: []
       }
+      driver_verification_audit: {
+        Row: {
+          action: string
+          details: Json | null
+          id: string
+          ip_address: unknown | null
+          performed_at: string
+          performed_by: string | null
+          verification_id: string | null
+        }
+        Insert: {
+          action: string
+          details?: Json | null
+          id?: string
+          ip_address?: unknown | null
+          performed_at?: string
+          performed_by?: string | null
+          verification_id?: string | null
+        }
+        Update: {
+          action?: string
+          details?: Json | null
+          id?: string
+          ip_address?: unknown | null
+          performed_at?: string
+          performed_by?: string | null
+          verification_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "driver_verification_audit_verification_id_fkey"
+            columns: ["verification_id"]
+            isOneToOne: false
+            referencedRelation: "driver_verifications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       driver_verifications: {
         Row: {
           admin_notes: string | null
@@ -343,6 +381,27 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["user_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["user_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["user_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       public_profiles: {
@@ -431,9 +490,16 @@ export type Database = {
           user_id: string
         }[]
       }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["user_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      user_role: "admin" | "driver" | "passenger"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -560,6 +626,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      user_role: ["admin", "driver", "passenger"],
+    },
   },
 } as const
