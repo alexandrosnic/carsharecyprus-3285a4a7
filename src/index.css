@@ -8,94 +8,94 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* ColorHunt Palette: FFF7D4, FFD95A, C07F00, 4C3D3D */
-    --background: 48 100% 91%; /* #FFF7D4 - Light cream */
-    --foreground: 0 11% 27%; /* #4C3D3D - Dark brown */
+    /* Grey background with white fonts */
+    --background: 220 13% 18%; /* Dark grey background */
+    --foreground: 0 0% 98%; /* White text */
 
-    --card: 48 100% 94%; /* Slightly lighter cream for cards */
-    --card-foreground: 0 11% 27%; /* #4C3D3D - Dark brown */
+    --card: 220 13% 22%; /* Slightly lighter grey for cards */
+    --card-foreground: 0 0% 98%; /* White text */
 
-    --popover: 48 100% 96%; /* Very light cream for popovers */
-    --popover-foreground: 0 11% 27%; /* #4C3D3D - Dark brown */
+    --popover: 220 13% 25%; /* Lighter grey for popovers */
+    --popover-foreground: 0 0% 98%; /* White text */
 
-    --primary: 44 100% 67%; /* #FFD95A - Golden yellow */
-    --primary-foreground: 0 11% 27%; /* #4C3D3D - Dark brown */
+    --primary: 44 100% 67%; /* Keep golden yellow for buttons */
+    --primary-foreground: 220 13% 18%; /* Dark grey text on yellow */
 
-    --secondary: 40 100% 38%; /* #C07F00 - Orange brown */
-    --secondary-foreground: 48 100% 91%; /* #FFF7D4 - Light cream */
+    --secondary: 220 13% 30%; /* Medium grey secondary */
+    --secondary-foreground: 0 0% 98%; /* White text */
 
-    --muted: 48 50% 85%; /* Muted cream */
-    --muted-foreground: 0 11% 50%; /* Lighter dark brown */
+    --muted: 220 13% 25%; /* Muted grey */
+    --muted-foreground: 0 0% 75%; /* Light grey text */
 
-    --accent: 44 80% 75%; /* Lighter golden yellow */
-    --accent-foreground: 0 11% 27%; /* #4C3D3D - Dark brown */
+    --accent: 44 80% 60%; /* Slightly muted golden */
+    --accent-foreground: 220 13% 18%; /* Dark grey text */
 
     --destructive: 0 84% 60%; /* Red for errors */
-    --destructive-foreground: 48 100% 91%; /* Light cream */
+    --destructive-foreground: 0 0% 98%; /* White text */
 
-    --border: 48 30% 80%; /* Subtle cream border */
-    --input: 48 50% 88%; /* Input background */
+    --border: 220 13% 35%; /* Medium grey border */
+    --input: 220 13% 28%; /* Dark grey input background */
     --ring: 44 100% 67%; /* Golden yellow focus ring */
 
-    --radius: 0.75rem; /* Slightly more rounded for warmth */
+    --radius: 0.75rem;
 
-    /* Custom gradients using the palette */
-    --gradient-warm: linear-gradient(135deg, hsl(48 100% 91%), hsl(44 100% 67%));
+    /* Custom gradients with grey base */
+    --gradient-warm: linear-gradient(135deg, hsl(220 13% 22%), hsl(44 100% 67%));
     --gradient-sunset: linear-gradient(135deg, hsl(44 100% 67%), hsl(40 100% 38%));
-    --gradient-earth: linear-gradient(135deg, hsl(40 100% 38%), hsl(0 11% 27%));
+    --gradient-earth: linear-gradient(135deg, hsl(220 13% 18%), hsl(220 13% 35%));
 
-    --sidebar-background: 48 100% 94%;
-    --sidebar-foreground: 0 11% 27%;
+    --sidebar-background: 220 13% 20%;
+    --sidebar-foreground: 0 0% 98%;
     --sidebar-primary: 44 100% 67%;
-    --sidebar-primary-foreground: 0 11% 27%;
-    --sidebar-accent: 40 100% 38%;
-    --sidebar-accent-foreground: 48 100% 91%;
-    --sidebar-border: 48 30% 75%;
+    --sidebar-primary-foreground: 220 13% 18%;
+    --sidebar-accent: 220 13% 30%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 220 13% 35%;
     --sidebar-ring: 44 100% 67%;
   }
 
   .dark {
-    /* Dark mode with warmer tones */
-    --background: 0 11% 15%; /* Darker version of dark brown */
-    --foreground: 48 100% 91%; /* Light cream for text */
+    /* Darker grey theme */
+    --background: 220 13% 12%; /* Even darker grey */
+    --foreground: 0 0% 98%; /* White text */
 
-    --card: 0 11% 20%; /* Slightly lighter dark for cards */
-    --card-foreground: 48 100% 91%; /* Light cream */
+    --card: 220 13% 16%; /* Darker grey for cards */
+    --card-foreground: 0 0% 98%; /* White text */
 
-    --popover: 0 11% 18%; /* Dark popover background */
-    --popover-foreground: 48 100% 91%; /* Light cream */
+    --popover: 220 13% 14%; /* Dark popover background */
+    --popover-foreground: 0 0% 98%; /* White text */
 
-    --primary: 44 100% 67%; /* Keep golden yellow as primary */
-    --primary-foreground: 0 11% 15%; /* Dark background */
+    --primary: 44 100% 67%; /* Golden yellow primary */
+    --primary-foreground: 220 13% 12%; /* Dark background */
 
-    --secondary: 40 100% 38%; /* Orange brown secondary */
-    --secondary-foreground: 48 100% 91%; /* Light cream */
+    --secondary: 220 13% 25%; /* Medium grey secondary */
+    --secondary-foreground: 0 0% 98%; /* White text */
 
-    --muted: 0 11% 25%; /* Muted dark */
-    --muted-foreground: 48 50% 70%; /* Muted light */
+    --muted: 220 13% 20%; /* Muted dark grey */
+    --muted-foreground: 0 0% 70%; /* Light grey text */
 
     --accent: 44 80% 55%; /* Slightly darker golden */
-    --accent-foreground: 0 11% 15%; /* Dark background */
+    --accent-foreground: 220 13% 12%; /* Dark background */
 
     --destructive: 0 84% 60%; /* Red for errors */
-    --destructive-foreground: 48 100% 91%; /* Light cream */
+    --destructive-foreground: 0 0% 98%; /* White text */
 
-    --border: 0 11% 30%; /* Dark border */
-    --input: 0 11% 25%; /* Dark input background */
+    --border: 220 13% 30%; /* Medium grey border */
+    --input: 220 13% 20%; /* Dark grey input background */
     --ring: 44 100% 67%; /* Golden yellow focus ring */
 
     /* Dark mode gradients */
-    --gradient-warm: linear-gradient(135deg, hsl(0 11% 20%), hsl(44 80% 45%));
+    --gradient-warm: linear-gradient(135deg, hsl(220 13% 16%), hsl(44 80% 45%));
     --gradient-sunset: linear-gradient(135deg, hsl(44 80% 45%), hsl(40 80% 30%));
-    --gradient-earth: linear-gradient(135deg, hsl(40 80% 30%), hsl(0 11% 15%));
+    --gradient-earth: linear-gradient(135deg, hsl(220 13% 12%), hsl(220 13% 25%));
 
-    --sidebar-background: 0 11% 18%;
-    --sidebar-foreground: 48 100% 91%;
+    --sidebar-background: 220 13% 14%;
+    --sidebar-foreground: 0 0% 98%;
     --sidebar-primary: 44 100% 67%;
-    --sidebar-primary-foreground: 0 11% 15%;
-    --sidebar-accent: 40 100% 38%;
-    --sidebar-accent-foreground: 48 100% 91%;
-    --sidebar-border: 0 11% 30%;
+    --sidebar-primary-foreground: 220 13% 12%;
+    --sidebar-accent: 220 13% 25%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 220 13% 30%;
     --sidebar-ring: 44 100% 67%;
   }
 }
