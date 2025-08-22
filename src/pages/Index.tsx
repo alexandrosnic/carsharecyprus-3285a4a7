@@ -43,7 +43,7 @@ const Index = () => {
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <img 
-              src="/lovable-uploads/91ee08c0-94c4-4efa-9e7d-17b75fc3e24b.png" 
+              src="/lovable-uploads/834c900c-913f-46a2-b82c-ee88234635ae.png" 
               alt="Car Share Cyprus Logo" 
               className="h-8 w-8"
             />
