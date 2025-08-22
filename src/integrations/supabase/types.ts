@@ -375,6 +375,36 @@ export type Database = {
         }
         Relationships: []
       }
+      safe_profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string | null
+          full_name: string | null
+          id: string | null
+          rating: number | null
+          total_rides: number | null
+          user_id: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          id?: string | null
+          rating?: number | null
+          total_rides?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          id?: string | null
+          rating?: number | null
+          total_rides?: number | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       confirm_booking_and_decrement: {
@@ -392,6 +422,14 @@ export type Database = {
       decrement_seats: {
         Args: { ride_id: string; seats_to_book: number }
         Returns: number
+      }
+      get_contact_info_for_booking: {
+        Args: { booking_id_param: string }
+        Returns: {
+          full_name: string
+          phone_number: string
+          user_id: string
+        }[]
       }
     }
     Enums: {
