@@ -61,51 +61,65 @@ serve(async (req) => {
         driver_amount
       } = metadata
 
-      console.log('Creating booking for successful payment:', {
+      console.log('Processing payment for ride booking:', {
+        eventId: event.id,
         rideId: ride_id,
         passengerId: passenger_id,
         seatsBooked: seats_booked,
-        totalAmount: total_amount
+        totalAmount: total_amount,
+        paymentIntentId: session.payment_intent
       })
 
-      // Create booking record
-      const { error: bookingError } = await supabaseClient
-        .from('bookings')
-        .insert({
-          ride_id,
-          passenger_id,
-          seats_booked: parseInt(seats_booked),
-          total_amount: parseFloat(total_amount),
-          commission_amount: parseFloat(commission_amount),
-          driver_amount: parseFloat(driver_amount),
-          status: 'confirmed',
-          stripe_payment_intent_id: session.payment_intent as string
-        })
+      // Check for idempotency - prevent duplicate processing
+      const { error: eventCheckError } = await supabaseClient
+        .from('stripe_events')
+        .insert({ event_id: event.id })
 
-      if (bookingError) {
-        console.error('Error creating booking:', bookingError)
+      if (eventCheckError) {
+        if (eventCheckError.code === '23505') { // Unique constraint violation
+          console.log('Event already processed, skipping:', event.id)
+          return new Response(JSON.stringify({ received: true, duplicate: true }), {
+            status: 200,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          })
+        } else {
+          console.error('Error checking event idempotency:', eventCheckError)
+          return new Response(
+            JSON.stringify({ error: 'Failed to process payment' }),
+            { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          )
+        }
+      }
+
+      try {
+        // Use atomic RPC to confirm booking and decrement seats
+        const { data: bookingId, error: confirmError } = await supabaseClient
+          .rpc('confirm_booking_and_decrement', {
+            p_ride_id: ride_id,
+            p_passenger_id: passenger_id,
+            p_seats_booked: parseInt(seats_booked),
+            p_total_amount: parseFloat(total_amount),
+            p_commission_amount: parseFloat(commission_amount),
+            p_driver_amount: parseFloat(driver_amount),
+            p_stripe_payment_intent_id: session.payment_intent as string
+          })
+
+        if (confirmError) {
+          console.error('Error confirming booking:', confirmError)
+          return new Response(
+            JSON.stringify({ error: 'Failed to confirm booking' }),
+            { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          )
+        }
+
+        console.log('Booking confirmed successfully:', { bookingId })
+      } catch (rpcError) {
+        console.error('RPC error:', rpcError)
         return new Response(
-          JSON.stringify({ error: 'Failed to create booking' }),
+          JSON.stringify({ error: 'Failed to process booking' }),
           { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
       }
-
-      // Update ride available seats
-      const { error: updateError } = await supabaseClient
-        .from('rides')
-        .update({ 
-          available_seats: supabaseClient.rpc('decrement_seats', { 
-            ride_id, 
-            seats_to_book: parseInt(seats_booked) 
-          })
-        })
-        .eq('id', ride_id)
-
-      if (updateError) {
-        console.error('Error updating ride seats:', updateError)
-      }
-
-      console.log('Booking created successfully')
     }
 
     return new Response(JSON.stringify({ received: true }), {
