@@ -45,7 +45,7 @@ const Index = () => {
             <img 
               src="/lovable-uploads/834c900c-913f-46a2-b82c-ee88234635ae.png" 
               alt="Car Share Cyprus Logo" 
-              className="h-8 w-8"
+              className="h-8"
             />
             <h1 className="text-2xl font-bold text-foreground">Car Share Cyprus</h1>
           </div>

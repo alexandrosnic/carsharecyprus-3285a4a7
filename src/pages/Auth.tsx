@@ -91,7 +91,7 @@ const Auth = () => {
             <img 
               src="/lovable-uploads/834c900c-913f-46a2-b82c-ee88234635ae.png" 
               alt="Car Share Cyprus Logo" 
-              className="h-8 w-8 mr-2"
+              className="h-8 mr-2"
             />
             <CardTitle className="text-2xl">Car Share Cyprus</CardTitle>
           </div>
