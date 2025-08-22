@@ -94,7 +94,7 @@ const SearchResults = () => {
       if (processedRides.length > 0) {
         const driverIds = [...new Set(processedRides.map(ride => ride.driver_id))];
         const { data: profiles } = await supabase
-          .from('public_profiles')
+          .from('safe_profiles')
           .select('user_id, full_name, avatar_url, rating, total_rides')
           .in('user_id', driverIds);
 

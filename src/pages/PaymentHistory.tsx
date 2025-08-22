@@ -108,7 +108,7 @@ const PaymentHistory = () => {
       let profiles: any[] = [];
       if (allUserIds.length > 0) {
         const { data: profilesData, error: profilesError } = await supabase
-          .from('public_profiles')
+          .from('safe_profiles')
           .select('user_id, full_name')
           .in('user_id', allUserIds);
 

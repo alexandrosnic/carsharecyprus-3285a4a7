@@ -123,7 +123,7 @@ const Chat = () => {
 
       // Get other user's profile (using public view for security)
       const { data: profileData, error: profileError } = await supabase
-        .from('public_profiles')
+        .from('safe_profiles')
         .select('user_id, full_name, avatar_url')
         .eq('user_id', otherUserId)
         .single();

@@ -62,7 +62,7 @@ const BookRide = () => {
 
       // Get driver profile (using public view for security)
       const { data: profileData, error: profileError } = await supabase
-        .from('public_profiles')
+        .from('safe_profiles')
         .select('full_name')
         .eq('user_id', rideData.driver_id)
         .single();

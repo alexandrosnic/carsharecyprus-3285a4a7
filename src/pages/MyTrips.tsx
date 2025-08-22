@@ -80,7 +80,7 @@ const MyTrips = () => {
       // Get driver profiles for passenger bookings (using public view)
       const driverIds = passengerBookings?.map(booking => (booking.rides as any)?.driver_id).filter(Boolean) || [];
       const { data: driverProfiles } = await supabase
-        .from('public_profiles')
+        .from('safe_profiles')
         .select('user_id, full_name, avatar_url, rating')
         .in('user_id', driverIds);
 
