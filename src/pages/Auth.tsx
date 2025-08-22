@@ -89,7 +89,7 @@ const Auth = () => {
         <CardHeader className="text-center">
           <div className="flex items-center justify-center mb-4">
             <img 
-              src="/lovable-uploads/1cf17db6-76f3-47b5-a98b-faec7c9593c8.png" 
+              src="/lovable-uploads/91ee08c0-94c4-4efa-9e7d-17b75fc3e24b.png" 
               alt="Car Share Cyprus Logo" 
               className="h-8 w-8 mr-2"
             />
