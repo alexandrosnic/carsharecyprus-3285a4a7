@@ -328,6 +328,21 @@ export type Database = {
         }
         Relationships: []
       }
+      stripe_events: {
+        Row: {
+          created_at: string
+          event_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       public_profiles: {
@@ -362,6 +377,18 @@ export type Database = {
       }
     }
     Functions: {
+      confirm_booking_and_decrement: {
+        Args: {
+          p_commission_amount: number
+          p_driver_amount: number
+          p_passenger_id: string
+          p_ride_id: string
+          p_seats_booked: number
+          p_stripe_payment_intent_id: string
+          p_total_amount: number
+        }
+        Returns: string
+      }
       decrement_seats: {
         Args: { ride_id: string; seats_to_book: number }
         Returns: number
