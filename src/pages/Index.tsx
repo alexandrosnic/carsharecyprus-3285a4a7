@@ -42,7 +42,11 @@ const Index = () => {
       <header className="bg-white dark:bg-gray-800 shadow-sm border-b">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <Car className="h-8 w-8 text-primary" />
+            <img 
+              src="/lovable-uploads/2942ceb3-25f9-42e2-a681-a5ea23578edf.png" 
+              alt="Car Share Cyprus Logo" 
+              className="h-8 w-8"
+            />
             <h1 className="text-2xl font-bold text-foreground">Car Share Cyprus</h1>
           </div>
           <div className="flex items-center space-x-4">

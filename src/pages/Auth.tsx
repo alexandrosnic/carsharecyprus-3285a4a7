@@ -88,7 +88,11 @@ const Auth = () => {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex items-center justify-center mb-4">
-            <Car className="h-8 w-8 text-primary mr-2" />
+            <img 
+              src="/lovable-uploads/2942ceb3-25f9-42e2-a681-a5ea23578edf.png" 
+              alt="Car Share Cyprus Logo" 
+              className="h-8 w-8 mr-2"
+            />
             <CardTitle className="text-2xl">Car Share Cyprus</CardTitle>
           </div>
           <CardDescription>
