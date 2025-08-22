@@ -7,7 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { ArrowLeft, Car, MapPin, Clock, Users, Star, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import { ArrowLeft, MapPin, Clock, Users, Star, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import { BRAND_LOGO } from '@/constants/brand';
 import { toast } from 'sonner';
 import { useNotifications } from '@/hooks/useNotifications';
 
@@ -244,7 +245,11 @@ const MyTrips = () => {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <Car className="h-12 w-12 animate-spin mx-auto mb-4 text-primary" />
+          <img 
+            src={BRAND_LOGO} 
+            alt="Car Share Cyprus Logo" 
+            className="h-12 w-12 animate-spin mx-auto mb-4" 
+          />
           <p>Loading your trips...</p>
         </div>
       </div>
@@ -283,7 +288,11 @@ const MyTrips = () => {
             {upcomingTrips.length === 0 ? (
               <Card className="text-center py-16">
                 <CardContent>
-                  <Car className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-50" />
+                  <img 
+                    src={BRAND_LOGO} 
+                    alt="Car Share Cyprus Logo" 
+                    className="h-16 w-16 mx-auto mb-4 opacity-50" 
+                  />
                   <h3 className="text-xl font-semibold mb-2">No upcoming trips</h3>
                   <p className="text-muted-foreground mb-6">
                     Start planning your next journey
@@ -402,7 +411,11 @@ const MyTrips = () => {
             {pastTrips.length === 0 ? (
               <Card className="text-center py-16">
                 <CardContent>
-                  <Car className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-50" />
+                  <img 
+                    src={BRAND_LOGO} 
+                    alt="Car Share Cyprus Logo" 
+                    className="h-16 w-16 mx-auto mb-4 opacity-50" 
+                  />
                   <h3 className="text-xl font-semibold mb-2">No past trips</h3>
                   <p className="text-muted-foreground">
                     Your completed trips will appear here

@@ -2,7 +2,8 @@ import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { Car, Plus, Search, User } from 'lucide-react';
+import { Plus, Search, User } from 'lucide-react';
+import { BRAND_LOGO } from '@/constants/brand';
 import { NotificationCenter } from '@/components/notifications/NotificationCenter';
 import { useNotifications } from '@/hooks/useNotifications';
 
@@ -25,7 +26,11 @@ const Index = () => {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <Car className="h-12 w-12 animate-spin mx-auto mb-4 text-primary" />
+          <img 
+            src={BRAND_LOGO} 
+            alt="Car Share Cyprus Logo" 
+            className="h-12 w-12 animate-spin mx-auto mb-4" 
+          />
           <p>Loading...</p>
         </div>
       </div>
@@ -102,7 +107,11 @@ const Index = () => {
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
           <h3 className="text-2xl font-bold mb-6 text-foreground">Recent Rides</h3>
           <div className="text-center py-12 text-muted-foreground">
-            <Car className="h-12 w-12 mx-auto mb-4 opacity-50" />
+            <img 
+              src={BRAND_LOGO} 
+              alt="Car Share Cyprus Logo" 
+              className="h-12 w-12 mx-auto mb-4 opacity-50" 
+            />
             <p>No rides yet. Create your first ride or search for available ones!</p>
           </div>
         </div>

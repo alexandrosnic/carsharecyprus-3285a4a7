@@ -8,7 +8,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { ArrowLeft, Camera, Star, Car, User, Phone, Mail, Save, Shield } from 'lucide-react';
+import { ArrowLeft, Camera, Star, User, Phone, Mail, Save, Shield } from 'lucide-react';
+import { BRAND_LOGO } from '@/constants/brand';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
@@ -100,7 +101,11 @@ const Profile = () => {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <Car className="h-12 w-12 animate-spin mx-auto mb-4 text-primary" />
+          <img 
+            src={BRAND_LOGO} 
+            alt="Car Share Cyprus Logo" 
+            className="h-12 w-12 animate-spin mx-auto mb-4" 
+          />
           <p>Loading profile...</p>
         </div>
       </div>
@@ -269,7 +274,11 @@ const Profile = () => {
                   View Payment History
                 </Button>
                 <div className="text-center py-4 text-muted-foreground">
-                  <Car className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                  <img 
+                    src={BRAND_LOGO} 
+                    alt="Car Share Cyprus Logo" 
+                    className="h-8 w-8 mx-auto mb-2 opacity-50" 
+                  />
                   <p className="text-sm">Payment methods will be available soon</p>
                   <p className="text-xs">PayPal, Stripe, and card payments coming soon</p>
                 </div>

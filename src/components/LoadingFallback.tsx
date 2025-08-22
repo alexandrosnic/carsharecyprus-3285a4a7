@@ -1,5 +1,6 @@
 import React from 'react';
-import { Car, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
+import { BRAND_LOGO } from '@/constants/brand';
 
 interface LoadingFallbackProps {
   message?: string;
@@ -18,7 +19,11 @@ export const LoadingFallback: React.FC<LoadingFallbackProps> = ({
     <div className={containerClasses}>
       <div className="text-center space-y-4">
         <div className="relative">
-          <Car className="h-12 w-12 text-primary mx-auto animate-bounce" />
+          <img 
+            src={BRAND_LOGO} 
+            alt="Car Share Cyprus Logo" 
+            className="h-12 w-12 mx-auto animate-bounce" 
+          />
           <Loader2 className="h-6 w-6 text-primary/60 animate-spin absolute -bottom-1 -right-1" />
         </div>
         <div className="space-y-2">
