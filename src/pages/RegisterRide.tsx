@@ -248,8 +248,8 @@ const RegisterRide = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
-      <header className="bg-white dark:bg-gray-800 shadow-sm border-b">
+    <div className="min-h-screen bg-background">
+      <header className="bg-card shadow-sm border-b border-border">
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <Button variant="ghost" size="sm" onClick={() => navigate('/')} className="flex items-center">

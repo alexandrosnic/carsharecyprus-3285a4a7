@@ -189,7 +189,7 @@ const DisputeResolution = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 p-4">
+    <div className="min-h-screen bg-background p-4">
       <div className="max-w-4xl mx-auto">
         <Button 
           variant="ghost" 
@@ -350,9 +350,9 @@ const DisputeResolution = () => {
                     )}
                     
                     {dispute.resolution && (
-                      <div className="mt-3 p-3 bg-green-50 rounded-lg">
-                        <h5 className="font-medium text-green-800 mb-1">Resolution</h5>
-                        <p className="text-sm text-green-700">{dispute.resolution}</p>
+                      <div className="mt-3 p-3 bg-accent/30 rounded-lg">
+                        <h5 className="font-medium text-foreground mb-1">Resolution</h5>
+                        <p className="text-sm text-muted-foreground">{dispute.resolution}</p>
                       </div>
                     )}
                   </CardContent>
