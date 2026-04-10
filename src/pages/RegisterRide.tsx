@@ -50,7 +50,8 @@ const RegisterRide = () => {
   const [stops, setStops] = useState<StopData[]>([]);
   const [departureCoords, setDepartureCoords] = useState<[number, number] | null>(null);
   const [arrivalCoords, setArrivalCoords] = useState<[number, number] | null>(null);
-  const [mapSelectMode, setMapSelectMode] = useState<'departure' | 'arrival' | null>(null);
+  const [mapSelectMode, setMapSelectMode] = useState<string | null>(null);
+  const [stopCoords, setStopCoords] = useState<Array<[number, number] | null>>([]);
   const [formData, setFormData] = useState<RideFormData>({
     departure_city: '',
     arrival_city: '',
