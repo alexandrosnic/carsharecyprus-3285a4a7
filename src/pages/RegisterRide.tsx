@@ -318,18 +318,25 @@ const RegisterRide = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              {/* Route Map Preview */}
-              {(departureCoords || arrivalCoords) && (
-                <Map
-                  className="w-full h-48 rounded-lg border border-border"
-                  center={departureCoords || arrivalCoords || [33.3792, 35.1872]}
-                  zoom={arrivalCoords && departureCoords ? 8 : 12}
-                  markers={[
-                    ...(departureCoords ? [{ coordinates: departureCoords, title: 'From', description: formData.departure_city }] : []),
-                    ...(arrivalCoords ? [{ coordinates: arrivalCoords, title: 'To', description: formData.arrival_city }] : []),
-                  ]}
-                />
-              )}
+              {/* Persistent Route Map */}
+              <ClickableMap
+                className="w-full h-56 rounded-lg border border-border"
+                departureCoords={departureCoords}
+                arrivalCoords={arrivalCoords}
+                departureLabel={formData.departure_city}
+                arrivalLabel={formData.arrival_city}
+                selectingMode={mapSelectMode}
+                onSelectingModeChange={setMapSelectMode}
+                onLocationPicked={(address, coords) => {
+                  if (mapSelectMode === 'departure') {
+                    handleInputChange('departure_city', address);
+                    setDepartureCoords(coords);
+                  } else if (mapSelectMode === 'arrival') {
+                    handleInputChange('arrival_city', address);
+                    setArrivalCoords(coords);
+                  }
+                }}
+              />
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
