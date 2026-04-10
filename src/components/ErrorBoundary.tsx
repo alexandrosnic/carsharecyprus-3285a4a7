@@ -28,7 +28,7 @@ export class ErrorBoundary extends Component<Props, State> {
     console.error('ErrorBoundary caught an error:', error, errorInfo);
     
     // Log error to monitoring service in production
-    if (process.env.NODE_ENV === 'production') {
+    if (import.meta.env.PROD) {
       // Add error tracking service here (e.g., Sentry, LogRocket)
       console.error('Production error:', {
         error: error.message,
@@ -76,7 +76,7 @@ export class ErrorBoundary extends Component<Props, State> {
                 </p>
               </div>
 
-              {process.env.NODE_ENV === 'development' && this.state.error && (
+              {import.meta.env.DEV && this.state.error && (
                 <details className="bg-muted p-3 rounded text-xs">
                   <summary className="cursor-pointer font-medium text-red-600 dark:text-red-400">
                     Error Details (Development)
