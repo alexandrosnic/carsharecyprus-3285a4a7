@@ -24,6 +24,8 @@ interface RideFormData {
   smoking_allowed: boolean;
   pets_allowed: boolean;
   return_ride: boolean;
+  vehicle_make: string;
+  vehicle_color: string;
 }
 
 const cities = [
@@ -46,6 +48,8 @@ const RegisterRide = () => {
     smoking_allowed: false,
     pets_allowed: false,
     return_ride: false,
+    vehicle_make: '',
+    vehicle_color: '',
   });
 
   const handleInputChange = (field: keyof RideFormData, value: string | number | boolean) => {
@@ -90,7 +94,12 @@ const RegisterRide = () => {
           available_seats: formData.available_seats,
           price_per_seat: parseFloat(formData.price_per_seat),
           description: formData.description,
-          status: 'active'
+          status: 'active',
+          vehicle_make: formData.vehicle_make || null,
+          vehicle_color: formData.vehicle_color || null,
+          smoking_allowed: formData.smoking_allowed,
+          pets_allowed: formData.pets_allowed,
+          luggage_size: formData.luggage_size || 'medium',
         });
 
       if (error) throw error;
@@ -285,6 +294,30 @@ const RegisterRide = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
+              {/* Vehicle Info */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="vehicle_make">Vehicle Make/Model</Label>
+                  <Input
+                    id="vehicle_make"
+                    value={formData.vehicle_make}
+                    onChange={(e) => handleInputChange('vehicle_make', e.target.value)}
+                    placeholder="e.g. Toyota Yaris"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="vehicle_color">Vehicle Color</Label>
+                  <Input
+                    id="vehicle_color"
+                    value={formData.vehicle_color}
+                    onChange={(e) => handleInputChange('vehicle_color', e.target.value)}
+                    placeholder="e.g. White"
+                  />
+                </div>
+              </div>
+
+              <Separator />
+
               {/* Luggage Size */}
               <div className="space-y-2">
                 <Label htmlFor="luggage">Luggage Size Allowed</Label>

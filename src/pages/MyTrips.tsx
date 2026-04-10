@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { ArrowLeft, MapPin, Clock, Users, Star, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import { ArrowLeft, MapPin, Clock, Users, Star, CheckCircle, XCircle, AlertCircle, Ban } from 'lucide-react';
 import { BRAND_LOGO } from '@/constants/brand';
 import { toast } from 'sonner';
 import { useNotifications } from '@/hooks/useNotifications';
@@ -180,6 +180,46 @@ const MyTrips = () => {
     } catch (error: any) {
       console.error('Error rejecting booking:', error);
       toast.error('Failed to reject booking');
+    }
+  };
+
+  const handleCancelRide = async (rideId: string) => {
+    if (!confirm('Are you sure you want to cancel this ride? All pending bookings will be cancelled.')) return;
+    try {
+      const { error } = await supabase
+        .from('rides')
+        .update({ status: 'cancelled' })
+        .eq('id', rideId)
+        .eq('driver_id', user?.id);
+
+      if (error) throw error;
+      toast.success('Ride cancelled');
+      fetchTrips();
+    } catch (error: any) {
+      console.error('Error cancelling ride:', error);
+      toast.error('Failed to cancel ride');
+    }
+  };
+
+  const handleCancelBooking = async (bookingId: string) => {
+    if (!confirm('Are you sure you want to cancel this booking?')) return;
+    try {
+      const { error } = await supabase
+        .from('bookings')
+        .update({ 
+          status: 'cancelled',
+          cancelled_at: new Date().toISOString(),
+          cancellation_reason: 'Cancelled by passenger'
+        })
+        .eq('id', bookingId)
+        .eq('passenger_id', user?.id);
+
+      if (error) throw error;
+      toast.success('Booking cancelled');
+      fetchTrips();
+    } catch (error: any) {
+      console.error('Error cancelling booking:', error);
+      toast.error('Failed to cancel booking');
     }
   };
 
@@ -397,6 +437,32 @@ const MyTrips = () => {
                                 </Button>
                               </div>
                             </div>
+                          </div>
+                        )}
+
+                        {/* Cancel buttons */}
+                        {trip.type === 'driver' && trip.status === 'active' && (
+                          <div className="mt-4 pt-4 border-t">
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => handleCancelRide(trip.id)}
+                            >
+                              <Ban className="h-4 w-4 mr-1" />
+                              Cancel Ride
+                            </Button>
+                          </div>
+                        )}
+                        {trip.type === 'passenger' && (trip.booking_status === 'pending' || trip.booking_status === 'confirmed') && (
+                          <div className="mt-4 pt-4 border-t">
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => handleCancelBooking(trip.id)}
+                            >
+                              <Ban className="h-4 w-4 mr-1" />
+                              Cancel Booking
+                            </Button>
                           </div>
                         )}
                       </CardContent>
