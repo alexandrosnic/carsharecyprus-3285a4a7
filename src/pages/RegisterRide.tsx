@@ -48,6 +48,8 @@ const RegisterRide = () => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [stops, setStops] = useState<StopData[]>([]);
+  const [departureCoords, setDepartureCoords] = useState<[number, number] | null>(null);
+  const [arrivalCoords, setArrivalCoords] = useState<[number, number] | null>(null);
   const [formData, setFormData] = useState<RideFormData>({
     departure_city: '',
     arrival_city: '',
