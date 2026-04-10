@@ -473,6 +473,7 @@ const RegisterRide = () => {
                   <Input
                     id="departure_time"
                     type="datetime-local"
+                    lang="en-GB"
                     value={formData.departure_time}
                     onChange={(e) => handleInputChange('departure_time', e.target.value)}
                     min={getTomorrow()}
@@ -656,6 +657,7 @@ const RegisterRide = () => {
                         <Input
                           id="return_time"
                           type="time"
+                          lang="en-GB"
                           value={formData.return_time}
                           onChange={(e) => handleInputChange('return_time', e.target.value)}
                         />
