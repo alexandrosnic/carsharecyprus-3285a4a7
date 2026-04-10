@@ -384,6 +384,7 @@ const Profile = () => {
             <CardContent>
               <div className="space-y-4">
                 <Button
+                  id="setup-payouts-btn"
                   variant={profileData.stripe_onboarding_complete ? "outline" : "default"}
                   className="w-full"
                   disabled={stripeLoading}
