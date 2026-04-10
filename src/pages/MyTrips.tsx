@@ -439,6 +439,32 @@ const MyTrips = () => {
                             </div>
                           </div>
                         )}
+
+                        {/* Cancel buttons */}
+                        {trip.type === 'driver' && trip.status === 'active' && (
+                          <div className="mt-4 pt-4 border-t">
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => handleCancelRide(trip.id)}
+                            >
+                              <Ban className="h-4 w-4 mr-1" />
+                              Cancel Ride
+                            </Button>
+                          </div>
+                        )}
+                        {trip.type === 'passenger' && (trip.booking_status === 'pending' || trip.booking_status === 'confirmed') && (
+                          <div className="mt-4 pt-4 border-t">
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => handleCancelBooking(trip.id)}
+                            >
+                              <Ban className="h-4 w-4 mr-1" />
+                              Cancel Booking
+                            </Button>
+                          </div>
+                        )}
                       </CardContent>
                     </Card>
                   );
