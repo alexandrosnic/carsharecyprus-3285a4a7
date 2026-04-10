@@ -1,13 +1,19 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { MapPin, Map, X } from 'lucide-react';
+import { MapPin, X, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 
 const cities = [
   'Nicosia', 'Limassol', 'Larnaca', 'Paphos', 'Famagusta', 'Kyrenia',
   'Protaras', 'Ayia Napa', 'Troodos', 'Polis', 'Paralimni'
 ];
+
+interface Suggestion {
+  label: string;
+  sublabel?: string;
+}
 
 interface LocationInputProps {
   value: string;
@@ -19,12 +25,22 @@ interface LocationInputProps {
 const LocationInput: React.FC<LocationInputProps> = ({ value, onChange, placeholder = 'Type city or address...', className }) => {
   const [inputValue, setInputValue] = useState(value);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [filteredCities, setFilteredCities] = useState<string[]>(cities);
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [mapboxToken, setMapboxToken] = useState<string | null>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+  const { session } = useAuth();
 
+  // Fetch mapbox token once
   useEffect(() => {
-    setInputValue(value);
-  }, [value]);
+    if (!session) return;
+    supabase.functions.invoke('get-mapbox-token').then(({ data, error }) => {
+      if (!error && data?.token) setMapboxToken(data.token);
+    });
+  }, [session]);
+
+  useEffect(() => { setInputValue(value); }, [value]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -36,35 +52,68 @@ const LocationInput: React.FC<LocationInputProps> = ({ value, onChange, placehol
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const searchMapbox = useCallback(async (query: string) => {
+    if (!mapboxToken || query.length < 2) return;
+    setLoading(true);
+    try {
+      const bbox = '32.0,34.5,34.6,35.7'; // Cyprus bounding box
+      const res = await fetch(
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${mapboxToken}&bbox=${bbox}&limit=5&types=place,locality,neighborhood,address,poi`
+      );
+      const data = await res.json();
+      if (data.features?.length) {
+        const mapboxSuggestions: Suggestion[] = data.features.map((f: any) => ({
+          label: f.text,
+          sublabel: f.place_name,
+        }));
+        setSuggestions(prev => {
+          // Merge: city matches first, then mapbox results (deduplicated)
+          const cityMatches = cities
+            .filter(c => c.toLowerCase().includes(query.toLowerCase()))
+            .map(c => ({ label: c }));
+          const seen = new Set(cityMatches.map(s => s.label.toLowerCase()));
+          const unique = mapboxSuggestions.filter(s => !seen.has(s.label.toLowerCase()));
+          return [...cityMatches, ...unique];
+        });
+      }
+    } catch (err) {
+      console.error('Geocoding error:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [mapboxToken]);
+
   const handleInputChange = (val: string) => {
     setInputValue(val);
     setShowSuggestions(true);
-    if (val.trim()) {
-      setFilteredCities(cities.filter(c => c.toLowerCase().includes(val.toLowerCase())));
-    } else {
-      setFilteredCities(cities);
+
+    // Immediate city filter
+    const cityMatches = cities
+      .filter(c => c.toLowerCase().includes(val.toLowerCase()))
+      .map(c => ({ label: c }));
+    setSuggestions(cityMatches);
+
+    // Debounced mapbox search
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (val.length >= 2 && mapboxToken) {
+      debounceRef.current = setTimeout(() => searchMapbox(val), 350);
     }
   };
 
-  const selectCity = (city: string) => {
-    setInputValue(city);
-    onChange(city);
+  const selectSuggestion = (suggestion: Suggestion) => {
+    const selected = suggestion.sublabel || suggestion.label;
+    setInputValue(suggestion.label);
+    onChange(selected);
     setShowSuggestions(false);
   };
 
   const handleBlur = () => {
-    // Delay to allow click on suggestion
     setTimeout(() => {
-      if (inputValue && inputValue !== value) {
-        onChange(inputValue);
-      }
+      if (inputValue && inputValue !== value) onChange(inputValue);
     }, 200);
   };
 
-  const clear = () => {
-    setInputValue('');
-    onChange('');
-  };
+  const clear = () => { setInputValue(''); onChange(''); };
 
   return (
     <div ref={wrapperRef} className={cn('relative', className)}>
@@ -73,42 +122,46 @@ const LocationInput: React.FC<LocationInputProps> = ({ value, onChange, placehol
         <Input
           value={inputValue}
           onChange={(e) => handleInputChange(e.target.value)}
-          onFocus={() => setShowSuggestions(true)}
+          onFocus={() => { if (inputValue) handleInputChange(inputValue); else { setSuggestions(cities.map(c => ({ label: c }))); setShowSuggestions(true); } }}
           onBlur={handleBlur}
           placeholder={placeholder}
           className="pl-9 pr-9"
         />
+        {loading && <Loader2 className="absolute right-9 top-3 h-4 w-4 text-muted-foreground animate-spin" />}
         {inputValue && (
-          <button
-            type="button"
-            onClick={clear}
-            className="absolute right-2 top-2 p-1 rounded hover:bg-accent"
-          >
+          <button type="button" onClick={clear} className="absolute right-2 top-2 p-1 rounded hover:bg-accent">
             <X className="h-4 w-4 text-muted-foreground" />
           </button>
         )}
       </div>
 
-      {showSuggestions && (
-        <div className="absolute z-50 w-full mt-1 bg-popover border border-border rounded-md shadow-lg max-h-48 overflow-auto">
-          {filteredCities.length > 0 ? (
-            filteredCities.map(city => (
-              <button
-                key={city}
-                type="button"
-                className="w-full text-left px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors flex items-center gap-2"
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={() => selectCity(city)}
-              >
-                <MapPin className="h-3 w-3 text-muted-foreground flex-shrink-0" />
-                {city}
-              </button>
-            ))
-          ) : (
-            <div className="px-3 py-2 text-sm text-muted-foreground">
-              No matching cities — your custom address will be used
-            </div>
-          )}
+      {showSuggestions && suggestions.length > 0 && (
+        <div className="absolute z-50 w-full mt-1 bg-popover border border-border rounded-md shadow-lg max-h-56 overflow-auto">
+          {suggestions.map((s, i) => (
+            <button
+              key={i}
+              type="button"
+              className="w-full text-left px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors flex items-start gap-2"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => selectSuggestion(s)}
+            >
+              <MapPin className="h-3 w-3 text-muted-foreground flex-shrink-0 mt-0.5" />
+              <div className="min-w-0">
+                <div className="font-medium truncate">{s.label}</div>
+                {s.sublabel && s.sublabel !== s.label && (
+                  <div className="text-xs text-muted-foreground truncate">{s.sublabel}</div>
+                )}
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
+
+      {showSuggestions && suggestions.length === 0 && inputValue.length >= 2 && !loading && (
+        <div className="absolute z-50 w-full mt-1 bg-popover border border-border rounded-md shadow-lg">
+          <div className="px-3 py-2 text-sm text-muted-foreground">
+            No results — your custom address will be used
+          </div>
         </div>
       )}
     </div>
