@@ -56,9 +56,11 @@ const LocationInput: React.FC<LocationInputProps> = ({ value, onChange, placehol
     if (!mapboxToken || query.length < 2) return;
     setLoading(true);
     try {
-      const bbox = '32.0,34.5,34.6,35.7';
+      // Use bbox to bias results towards Cyprus but don't restrict with country=cy
+      // so POIs (shops, landmarks) indexed under different country codes still appear
+      const bbox = '32.0,34.4,34.7,35.75';
       const res = await fetch(
-        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${mapboxToken}&bbox=${bbox}&limit=5&types=place,locality,neighborhood,address,poi&country=cy`
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${mapboxToken}&bbox=${bbox}&limit=7&types=place,locality,neighborhood,address,poi&proximity=33.38,35.17`
       );
       const data = await res.json();
       const mapboxResults: LocationResult[] = (data.features || []).map((f: any) => ({
