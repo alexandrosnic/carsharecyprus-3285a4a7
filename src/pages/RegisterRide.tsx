@@ -469,16 +469,53 @@ const RegisterRide = () => {
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="departure_time">Departure Date & Time *</Label>
+                  <Label>Departure Date *</Label>
                   <Input
-                    id="departure_time"
-                    type="datetime-local"
-                    lang="en-GB"
-                    value={formData.departure_time}
-                    onChange={(e) => handleInputChange('departure_time', e.target.value)}
-                    min={getTomorrow()}
+                    type="date"
+                    value={formData.departure_time ? formData.departure_time.split('T')[0] : ''}
+                    onChange={(e) => {
+                      const currentTime = formData.departure_time ? formData.departure_time.split('T')[1] || '08:00' : '08:00';
+                      handleInputChange('departure_time', e.target.value ? `${e.target.value}T${currentTime}` : '');
+                    }}
+                    min={getTomorrow().split('T')[0]}
                     required
                   />
+                </div>
+                <div className="space-y-2">
+                  <Label>Departure Time *</Label>
+                  <div className="flex gap-2 items-center">
+                    <Select
+                      value={formData.departure_time ? formData.departure_time.split('T')[1]?.split(':')[0] || '08' : ''}
+                      onValueChange={(h) => {
+                        const date = formData.departure_time ? formData.departure_time.split('T')[0] : '';
+                        const min = formData.departure_time ? formData.departure_time.split('T')[1]?.split(':')[1] || '00' : '00';
+                        if (date) handleInputChange('departure_time', `${date}T${h}:${min}`);
+                      }}
+                    >
+                      <SelectTrigger className="w-20"><SelectValue placeholder="HH" /></SelectTrigger>
+                      <SelectContent>
+                        {Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0')).map(h => (
+                          <SelectItem key={h} value={h}>{h}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <span className="text-lg font-bold">:</span>
+                    <Select
+                      value={formData.departure_time ? formData.departure_time.split('T')[1]?.split(':')[1] || '00' : ''}
+                      onValueChange={(m) => {
+                        const date = formData.departure_time ? formData.departure_time.split('T')[0] : '';
+                        const hr = formData.departure_time ? formData.departure_time.split('T')[1]?.split(':')[0] || '08' : '08';
+                        if (date) handleInputChange('departure_time', `${date}T${hr}:${m}`);
+                      }}
+                    >
+                      <SelectTrigger className="w-20"><SelectValue placeholder="MM" /></SelectTrigger>
+                      <SelectContent>
+                        {['00', '05', '10', '15', '20', '25', '30', '35', '40', '45', '50', '55'].map(m => (
+                          <SelectItem key={m} value={m}>{m}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="seats">Available Seats *</Label>
@@ -654,13 +691,37 @@ const RegisterRide = () => {
                     {formData.return_ride && (
                       <div className="pl-6 border-l-2 border-primary/20 space-y-2">
                         <Label htmlFor="return_time">Return time</Label>
-                        <Input
-                          id="return_time"
-                          type="time"
-                          lang="en-GB"
-                          value={formData.return_time}
-                          onChange={(e) => handleInputChange('return_time', e.target.value)}
-                        />
+                        <div className="flex gap-2 items-center">
+                          <Select
+                            value={formData.return_time ? formData.return_time.split(':')[0] : ''}
+                            onValueChange={(h) => {
+                              const min = formData.return_time ? formData.return_time.split(':')[1] || '00' : '00';
+                              handleInputChange('return_time', `${h}:${min}`);
+                            }}
+                          >
+                            <SelectTrigger className="w-20"><SelectValue placeholder="HH" /></SelectTrigger>
+                            <SelectContent>
+                              {Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0')).map(h => (
+                                <SelectItem key={h} value={h}>{h}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <span className="text-lg font-bold">:</span>
+                          <Select
+                            value={formData.return_time ? formData.return_time.split(':')[1] || '00' : ''}
+                            onValueChange={(m) => {
+                              const hr = formData.return_time ? formData.return_time.split(':')[0] || '08' : '08';
+                              handleInputChange('return_time', `${hr}:${m}`);
+                            }}
+                          >
+                            <SelectTrigger className="w-20"><SelectValue placeholder="MM" /></SelectTrigger>
+                            <SelectContent>
+                              {['00', '05', '10', '15', '20', '25', '30', '35', '40', '45', '50', '55'].map(m => (
+                                <SelectItem key={m} value={m}>{m}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
                         <p className="text-xs text-muted-foreground">
                           A return ride ({formData.arrival_city || '...'} → {formData.departure_city || '...'}) will be created at this time on the same day.
                         </p>
