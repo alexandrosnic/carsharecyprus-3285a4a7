@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { ArrowLeft, Camera, Star, User, Phone, Mail, Save, Shield, Loader2, MessageSquare } from 'lucide-react';
+import { ArrowLeft, Camera, Star, User, Phone, Mail, Save, Shield, Loader2, MessageSquare, Banknote, ExternalLink } from 'lucide-react';
 import { BRAND_LOGO } from '@/constants/brand';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -20,6 +20,8 @@ interface ProfileData {
   avatar_url: string;
   rating: number;
   total_rides: number;
+  stripe_account_id?: string;
+  stripe_onboarding_complete?: boolean;
 }
 
 interface Review {
@@ -37,6 +39,7 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [stripeLoading, setStripeLoading] = useState(false);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [profileData, setProfileData] = useState<ProfileData>({
     full_name: '',
@@ -105,6 +108,8 @@ const Profile = () => {
           avatar_url: data.avatar_url || '',
           rating: data.rating || 5.0,
           total_rides: data.total_rides || 0,
+          stripe_account_id: (data as any).stripe_account_id || undefined,
+          stripe_onboarding_complete: (data as any).stripe_onboarding_complete || false,
         });
       }
     } catch (error: any) {
@@ -350,14 +355,65 @@ const Profile = () => {
             </CardContent>
           </Card>
 
-          {/* Payment Methods */}
+          {/* Driver Payouts - Stripe Connect */}
           <Card>
             <CardHeader>
-              <CardTitle>Payment Methods</CardTitle>
-              <CardDescription>Manage your payment methods for rides</CardDescription>
+              <CardTitle className="flex items-center gap-2">
+                <Banknote className="h-5 w-5" />
+                Driver Payouts
+              </CardTitle>
+              <CardDescription>
+                {profileData.stripe_onboarding_complete
+                  ? 'Your payouts are set up. You receive 90% of each fare automatically.'
+                  : 'Set up automatic payouts to receive your share (90%) of ride fares directly to your bank account.'}
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
+                <Button
+                  variant={profileData.stripe_onboarding_complete ? "outline" : "default"}
+                  className="w-full"
+                  disabled={stripeLoading}
+                  onClick={async () => {
+                    setStripeLoading(true);
+                    try {
+                      const { data, error } = await supabase.functions.invoke('create-connect-account', {
+                        body: { return_url: window.location.origin + '/profile' },
+                      });
+                      if (error) throw error;
+                      if (data?.url) {
+                        window.open(data.url, '_blank');
+                      }
+                      if (data?.onboarding_complete) {
+                        setProfileData(prev => ({ ...prev, stripe_onboarding_complete: true }));
+                      }
+                    } catch (error: any) {
+                      console.error('Stripe Connect error:', error);
+                      toast.error('Failed to set up payouts');
+                    } finally {
+                      setStripeLoading(false);
+                    }
+                  }}
+                >
+                  {stripeLoading ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                  )}
+                  {profileData.stripe_onboarding_complete
+                    ? 'Open Stripe Dashboard'
+                    : 'Set Up Payouts'}
+                </Button>
+
+                {profileData.stripe_onboarding_complete && (
+                  <div className="flex items-center gap-2 text-sm text-green-600">
+                    <Shield className="h-4 w-4" />
+                    Payouts active — 90% of fares sent to your bank
+                  </div>
+                )}
+
+                <Separator />
+
                 <Button 
                   variant="outline" 
                   onClick={() => navigate('/driver-verification')}
@@ -374,15 +430,6 @@ const Profile = () => {
                 >
                   View Payment History
                 </Button>
-                <div className="text-center py-4 text-muted-foreground">
-                  <img 
-                    src={BRAND_LOGO} 
-                    alt="Car Share Cyprus Logo" 
-                    className="h-8 w-8 mx-auto mb-2 opacity-50" 
-                  />
-                  <p className="text-sm">Payment methods will be available soon</p>
-                  <p className="text-xs">PayPal, Stripe, and card payments coming soon</p>
-                </div>
               </div>
             </CardContent>
           </Card>
