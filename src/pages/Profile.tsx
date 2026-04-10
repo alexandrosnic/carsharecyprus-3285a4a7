@@ -37,6 +37,7 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [reviews, setReviews] = useState<Review[]>([]);
   const [profileData, setProfileData] = useState<ProfileData>({
     full_name: '',
     phone_number: '',
@@ -48,8 +49,41 @@ const Profile = () => {
   useEffect(() => {
     if (user) {
       fetchProfile();
+      fetchReviews();
     }
   }, [user]);
+
+  const fetchReviews = async () => {
+    if (!user) return;
+    try {
+      const { data: ratingsData, error } = await supabase
+        .from('ratings')
+        .select('id, rating, comment, created_at, rater_id')
+        .eq('rated_user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      if (error) throw error;
+
+      if (ratingsData && ratingsData.length > 0) {
+        const raterIds = ratingsData.map(r => r.rater_id);
+        const { data: profiles } = await supabase
+          .from('safe_profiles')
+          .select('user_id, full_name')
+          .in('user_id', raterIds);
+
+        setReviews(ratingsData.map(r => ({
+          id: r.id,
+          rating: r.rating,
+          comment: r.comment,
+          created_at: r.created_at,
+          rater_name: profiles?.find(p => p.user_id === r.rater_id)?.full_name || 'Anonymous',
+        })));
+      }
+    } catch (error) {
+      console.error('Error fetching reviews:', error);
+    }
+  };
 
   const fetchProfile = async () => {
     try {
