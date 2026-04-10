@@ -21,6 +21,7 @@ import Chat from "./pages/Chat";
 import PaymentHistory from "./pages/PaymentHistory";
 import DriverVerification from "./pages/DriverVerification";
 import DisputeResolution from "./pages/DisputeResolution";
+import Privacy from "./pages/Privacy";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -49,6 +50,7 @@ const App = () => (
                 <Route path="/chat/:rideId" element={<Chat />} />
                 <Route path="/payment-history" element={<PaymentHistory />} />
                 <Route path="/dispute" element={<DisputeResolution />} />
+                <Route path="/privacy" element={<Privacy />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

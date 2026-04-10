@@ -92,8 +92,8 @@ serve(async (req) => {
         },
       ],
       mode: 'payment',
-      success_url: `https://32781cd9-dd85-42df-ae48-aac752d722c9.lovableproject.com/my-trips?payment=success&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `https://32781cd9-dd85-42df-ae48-aac752d722c9.lovableproject.com/ride/${ride_id}?payment=cancelled`,
+      success_url: `https://carsharecyprus.lovable.app/my-trips?payment=success&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `https://carsharecyprus.lovable.app/ride/${ride_id}?payment=cancelled`,
       metadata: {
         ride_id,
         passenger_id: user.id,
