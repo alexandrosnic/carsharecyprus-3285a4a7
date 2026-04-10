@@ -42,6 +42,31 @@ const MyTrips = () => {
   useEffect(() => {
     if (user) {
       fetchTrips();
+
+      // Subscribe to realtime booking changes
+      const bookingsChannel = supabase
+        .channel('booking-updates')
+        .on(
+          'postgres_changes',
+          { event: 'UPDATE', schema: 'public', table: 'bookings' },
+          (payload) => {
+            const updated = payload.new as any;
+            // Refresh if this booking involves the current user
+            if (updated.passenger_id === user.id) {
+              if (updated.status === 'confirmed') {
+                toast.success('Your booking has been confirmed by the driver!');
+              } else if (updated.status === 'rejected') {
+                toast.error('Your booking was rejected by the driver.');
+              }
+              fetchTrips();
+            }
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(bookingsChannel);
+      };
     }
   }, [user]);
 
