@@ -1,12 +1,10 @@
 // Service Worker for Push Notifications and PWA functionality
-const CACHE_NAME = 'carpool-pal-v1';
+const CACHE_NAME = 'carshare-cyprus-v2';
 const STATIC_CACHE_URLS = [
-  '/',
   '/manifest.json',
   '/offline.html'
 ];
 
-// Install event - cache static resources
 self.addEventListener('install', (event) => {
   console.log('[SW] Install event');
   event.waitUntil(
@@ -22,50 +20,63 @@ self.addEventListener('install', (event) => {
   self.skipWaiting();
 });
 
-// Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
   console.log('[SW] Activate event');
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            console.log('[SW] Deleting old cache:', cacheName);
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    })
+    caches.keys().then((cacheNames) => Promise.all(
+      cacheNames.map((cacheName) => {
+        if (cacheName !== CACHE_NAME) {
+          console.log('[SW] Deleting old cache:', cacheName);
+          return caches.delete(cacheName);
+        }
+        return Promise.resolve(false);
+      })
+    ))
   );
   self.clients.claim();
 });
 
-// Fetch event - serve from cache when offline
 self.addEventListener('fetch', (event) => {
-  // Only handle GET requests
   if (event.request.method !== 'GET') {
     return;
   }
 
+  const requestUrl = new URL(event.request.url);
+
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request).catch(() => caches.match('/offline.html'))
+    );
+    return;
+  }
+
+  if (requestUrl.origin !== self.location.origin) {
+    return;
+  }
+
   event.respondWith(
-    caches.match(event.request)
-      .then((response) => {
-        // Return cached version or fetch from network
-        return response || fetch(event.request);
-      })
-      .catch(() => {
-        // If both cache and network fail, show offline page for navigation requests
-        if (event.request.mode === 'navigate') {
-          return caches.match('/offline.html');
+    caches.match(event.request).then((cachedResponse) => {
+      if (cachedResponse) {
+        return cachedResponse;
+      }
+
+      return fetch(event.request).then((networkResponse) => {
+        if (networkResponse && networkResponse.ok) {
+          const responseClone = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseClone);
+          });
         }
-      })
+
+        return networkResponse;
+      });
+    })
   );
 });
 
-// Push event - handle push notifications
 self.addEventListener('push', (event) => {
   console.log('[SW] Push received:', event);
-  
+
   let notificationData = {
     title: 'Carpool Cyprus',
     body: 'You have a new notification',
@@ -109,52 +120,44 @@ self.addEventListener('push', (event) => {
   );
 });
 
-// Notification click event
 self.addEventListener('notificationclick', (event) => {
   console.log('[SW] Notification clicked:', event);
-  
+
   event.notification.close();
 
   if (event.action === 'dismiss') {
     return;
   }
 
-  // Open the app
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true })
       .then((clientList) => {
-        // If app is already open, focus it
-        for (let client of clientList) {
+        for (const client of clientList) {
           if (client.url.includes(self.location.origin) && 'focus' in client) {
             return client.focus();
           }
         }
-        
-        // Otherwise, open new window
+
         if (clients.openWindow) {
           return clients.openWindow('/');
         }
+
+        return undefined;
       })
   );
 });
 
-// Background sync for offline actions
 self.addEventListener('sync', (event) => {
   console.log('[SW] Background sync:', event.tag);
-  
+
   if (event.tag === 'background-sync') {
-    event.waitUntil(
-      // Handle offline actions when back online
-      handleBackgroundSync()
-    );
+    event.waitUntil(handleBackgroundSync());
   }
 });
 
 async function handleBackgroundSync() {
   try {
-    // Handle any offline actions stored in IndexedDB
     console.log('[SW] Processing background sync');
-    // Implementation would depend on specific offline functionality needed
   } catch (error) {
     console.error('[SW] Background sync failed:', error);
   }
