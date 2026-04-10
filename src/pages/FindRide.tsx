@@ -9,6 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Search, MapPin, Calendar, Users, X, Map, Filter } from 'lucide-react';
+import LocationInput from '@/components/LocationInput';
 
 interface SearchFilters {
   departure: string;
@@ -103,71 +104,21 @@ const FindRide = () => {
               {/* Departure Location */}
               <div className="space-y-2">
                 <Label htmlFor="departure">From</Label>
-                <div className="relative">
-                  <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Select
-                    value={searchFilters.departure}
-                    onValueChange={(value) => setSearchFilters(prev => ({ ...prev, departure: value }))}
-                  >
-                    <SelectTrigger className="pl-9">
-                      <SelectValue placeholder="Departure city" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {cities.map(city => (
-                        <SelectItem key={city} value={city}>{city}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {searchFilters.departure && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="absolute right-2 top-1 h-8 w-8 p-0"
-                      onClick={() => clearLocation('departure')}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  )}
-                </div>
-                <Button variant="outline" size="sm" className="w-full">
-                  <Map className="h-4 w-4 mr-2" />
-                  Choose on map
-                </Button>
+                <LocationInput
+                  value={searchFilters.departure}
+                  onChange={(val) => setSearchFilters(prev => ({ ...prev, departure: val }))}
+                  placeholder="Type departure city..."
+                />
               </div>
 
               {/* Destination Location */}
               <div className="space-y-2">
                 <Label htmlFor="destination">To</Label>
-                <div className="relative">
-                  <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Select
-                    value={searchFilters.destination}
-                    onValueChange={(value) => setSearchFilters(prev => ({ ...prev, destination: value }))}
-                  >
-                    <SelectTrigger className="pl-9">
-                      <SelectValue placeholder="Type destination, or Choose on map" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {cities.map(city => (
-                        <SelectItem key={city} value={city}>{city}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {searchFilters.destination && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="absolute right-2 top-1 h-8 w-8 p-0"
-                      onClick={() => clearLocation('destination')}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  )}
-                </div>
-                <Button variant="outline" size="sm" className="w-full">
-                  <Map className="h-4 w-4 mr-2" />
-                  Choose on map
-                </Button>
+                <LocationInput
+                  value={searchFilters.destination}
+                  onChange={(val) => setSearchFilters(prev => ({ ...prev, destination: val }))}
+                  placeholder="Type destination city..."
+                />
               </div>
             </div>
 
