@@ -75,8 +75,17 @@ serve(async (req) => {
       apiVersion: '2023-10-16',
     })
 
-    // Create Stripe checkout session
-    const session = await stripe.checkout.sessions.create({
+    // Check if driver has a connected Stripe account
+    const { data: driverProfile } = await supabaseClient
+      .from('profiles')
+      .select('stripe_account_id, stripe_onboarding_complete')
+      .eq('user_id', ride.driver_id)
+      .single()
+
+    const hasConnectedAccount = driverProfile?.stripe_account_id && driverProfile?.stripe_onboarding_complete
+
+    // Build checkout session params
+    const sessionParams: any = {
       payment_method_types: ['card'],
       line_items: [
         {
@@ -102,7 +111,23 @@ serve(async (req) => {
         commission_amount: (commissionAmount / 100).toString(),
         driver_amount: (driverAmount / 100).toString(),
       },
-    })
+    }
+
+    // If driver has Stripe Connect, auto-split the payment
+    if (hasConnectedAccount) {
+      sessionParams.payment_intent_data = {
+        application_fee_amount: commissionAmount, // Platform keeps 10%
+        transfer_data: {
+          destination: driverProfile.stripe_account_id, // 90% goes to driver
+        },
+      }
+      console.log('Using Stripe Connect transfer to:', driverProfile.stripe_account_id)
+    } else {
+      console.log('Driver has no Connect account, payment goes to platform')
+    }
+
+    // Create Stripe checkout session
+    const session = await stripe.checkout.sessions.create(sessionParams)
 
     console.log('Payment session created:', {
       sessionId: session.id,
