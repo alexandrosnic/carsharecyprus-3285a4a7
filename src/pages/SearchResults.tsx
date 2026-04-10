@@ -66,9 +66,9 @@ const SearchResults = () => {
         .from('rides')
         .select('*')
         .eq('status', 'active')
-        .gte('available_seats', passengers);
+        .gte('available_seats', passengers)
+        .gte('departure_time', new Date().toISOString()); // Only future rides
 
-      // Apply filters based on search params
       if (departure) {
         query = query.eq('departure_city', departure);
       }
@@ -76,7 +76,8 @@ const SearchResults = () => {
         query = query.eq('arrival_city', destination);
       }
       if (date) {
-        const startOfDay = new Date(date).toISOString();
+        // Filter rides for the entire selected date
+        const startOfDay = new Date(date + 'T00:00:00').toISOString();
         const endOfDay = new Date(date + 'T23:59:59').toISOString();
         query = query.gte('departure_time', startOfDay).lte('departure_time', endOfDay);
       }
@@ -295,12 +296,21 @@ const SearchResults = () => {
             <CardContent>
               <Car className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-50" />
               <h3 className="text-xl font-semibold mb-2">No rides found</h3>
-              <p className="text-muted-foreground mb-6">
-                Try adjusting your search criteria or filters
+              <p className="text-muted-foreground mb-2">
+                No rides match your search for {departure} → {destination}
+                {date && ` on ${formatDate(date + 'T12:00:00')}`}
               </p>
-              <Button onClick={() => navigate('/find-ride')}>
-                Modify Search
-              </Button>
+              <p className="text-sm text-muted-foreground mb-6">
+                Try a different date, fewer passengers, or create your own ride
+              </p>
+              <div className="flex gap-4 justify-center">
+                <Button onClick={() => navigate('/find-ride')}>
+                  Modify Search
+                </Button>
+                <Button variant="outline" onClick={() => navigate('/register-ride')}>
+                  Offer This Ride
+                </Button>
+              </div>
             </CardContent>
           </Card>
         ) : (
