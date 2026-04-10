@@ -1,11 +1,9 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { MapPin, X, Loader2, Map } from 'lucide-react';
+import { MapPin, X, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import MapPickerDialog from '@/components/MapPickerDialog';
 
 const cities = [
   'Nicosia', 'Limassol', 'Larnaca', 'Paphos', 'Famagusta', 'Kyrenia',
@@ -31,7 +29,6 @@ const LocationInput: React.FC<LocationInputProps> = ({ value, onChange, placehol
   const [suggestions, setSuggestions] = useState<LocationResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [mapboxToken, setMapboxToken] = useState<string | null>(null);
-  const [showMapPicker, setShowMapPicker] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
   const { session } = useAuth();
@@ -119,13 +116,8 @@ const LocationInput: React.FC<LocationInputProps> = ({ value, onChange, placehol
 
   const clear = () => { setInputValue(''); onChange(''); };
 
-  const handleMapSelect = (address: string, coordinates: [number, number]) => {
-    setInputValue(address);
-    onChange(address, { label: address, fullAddress: address, coordinates });
-  };
-
   return (
-    <div ref={wrapperRef} className={cn('space-y-2', className)}>
+    <div ref={wrapperRef} className={cn('relative', className)}>
       <div className="relative">
         <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
         <Input
@@ -145,57 +137,34 @@ const LocationInput: React.FC<LocationInputProps> = ({ value, onChange, placehol
             <X className="h-4 w-4 text-muted-foreground" />
           </button>
         )}
-
-        {showSuggestions && (
-          <div className="absolute z-50 w-full mt-1 bg-popover border border-border rounded-md shadow-lg max-h-56 overflow-auto">
-            {suggestions.map((s, i) => (
-              <button
-                key={i}
-                type="button"
-                className="w-full text-left px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors flex items-start gap-2"
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={() => selectSuggestion(s)}
-              >
-                <MapPin className="h-3 w-3 text-muted-foreground flex-shrink-0 mt-0.5" />
-                <span className="truncate">{s.label}</span>
-              </button>
-            ))}
-            {/* Always show "Use this address" when typing custom text */}
-            {inputValue.length >= 2 && (
-              <button
-                type="button"
-                className="w-full text-left px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors flex items-start gap-2 border-t border-border text-primary font-medium"
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={confirmCustomAddress}
-              >
-                <MapPin className="h-3 w-3 flex-shrink-0 mt-0.5" />
-                Use "{inputValue}" as address
-              </button>
-            )}
-          </div>
-        )}
       </div>
 
-      {mapboxToken && (
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="w-full"
-          onClick={() => setShowMapPicker(true)}
-        >
-          <Map className="h-4 w-4 mr-2" />
-          Choose on map
-        </Button>
-      )}
-
-      {mapboxToken && (
-        <MapPickerDialog
-          open={showMapPicker}
-          onClose={() => setShowMapPicker(false)}
-          onSelect={handleMapSelect}
-          mapboxToken={mapboxToken}
-        />
+      {showSuggestions && (
+        <div className="absolute z-50 w-full mt-1 bg-popover border border-border rounded-md shadow-lg max-h-56 overflow-auto">
+          {suggestions.map((s, i) => (
+            <button
+              key={i}
+              type="button"
+              className="w-full text-left px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors flex items-start gap-2"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => selectSuggestion(s)}
+            >
+              <MapPin className="h-3 w-3 text-muted-foreground flex-shrink-0 mt-0.5" />
+              <span className="truncate">{s.label}</span>
+            </button>
+          ))}
+          {inputValue.length >= 2 && (
+            <button
+              type="button"
+              className="w-full text-left px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors flex items-start gap-2 border-t border-border text-primary font-medium"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={confirmCustomAddress}
+            >
+              <MapPin className="h-3 w-3 flex-shrink-0 mt-0.5" />
+              Use "{inputValue}" as address
+            </button>
+          )}
+        </div>
       )}
     </div>
   );
