@@ -13,6 +13,7 @@ import Profile from "./pages/Profile";
 import FindRide from "./pages/FindRide";
 import SearchResults from "./pages/SearchResults";
 import RegisterRide from "./pages/RegisterRide";
+import EditRide from "./pages/EditRide";
 import RideDetails from "./pages/RideDetails";
 import BookRide from "./pages/BookRide";
 import MyTrips from "./pages/MyTrips";
@@ -43,6 +44,7 @@ const App = () => (
                 <Route path="/find-ride" element={<FindRide />} />
                 <Route path="/search-results" element={<SearchResults />} />
                 <Route path="/register-ride" element={<RegisterRide />} />
+                <Route path="/edit-ride/:rideId" element={<EditRide />} />
                 <Route path="/ride/:rideId" element={<RideDetails />} />
                 <Route path="/book-ride/:rideId" element={<BookRide />} />
                 <Route path="/my-trips" element={<MyTrips />} />
