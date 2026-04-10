@@ -326,6 +326,10 @@ const RegisterRide = () => {
                 arrivalCoords={arrivalCoords}
                 departureLabel={formData.departure_city}
                 arrivalLabel={formData.arrival_city}
+                stopMarkers={stopCoords.reduce<MapMarkerData[]>((acc, c, i) => {
+                  if (c && stops[i]?.city) acc.push({ coordinates: c, label: `Stop ${i + 1}: ${stops[i].city}`, color: '#f59e0b' });
+                  return acc;
+                }, [])}
                 selectingMode={mapSelectMode}
                 onSelectingModeChange={setMapSelectMode}
                 onLocationPicked={(address, coords) => {
@@ -335,6 +339,14 @@ const RegisterRide = () => {
                   } else if (mapSelectMode === 'arrival') {
                     handleInputChange('arrival_city', address);
                     setArrivalCoords(coords);
+                  } else if (mapSelectMode?.startsWith('stop-')) {
+                    const idx = parseInt(mapSelectMode.replace('stop-', ''));
+                    updateStop(idx, 'city', address);
+                    setStopCoords(prev => {
+                      const next = [...prev];
+                      next[idx] = coords;
+                      return next;
+                    });
                   }
                 }}
               />
@@ -378,7 +390,10 @@ const RegisterRide = () => {
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <Label>Intermediate Stops (optional)</Label>
-                  <Button type="button" variant="outline" size="sm" onClick={addStop}>
+                  <Button type="button" variant="outline" size="sm" onClick={() => {
+                    addStop();
+                    setStopCoords(prev => [...prev, null]);
+                  }}>
                     <Plus className="h-3 w-3 mr-1" />
                     Add Stop
                   </Button>
@@ -387,28 +402,50 @@ const RegisterRide = () => {
                 {stops.length > 0 && (
                   <div className="space-y-3">
                     {stops.map((stop, index) => (
-                      <div key={index} className="flex items-end gap-3 p-3 border border-border rounded-lg">
-                        <div className="flex-1 space-y-1">
-                          <Label className="text-xs">Stop {index + 1}</Label>
-                          <LocationInput
-                            value={stop.city}
-                            onChange={(val) => updateStop(index, 'city', val)}
-                            placeholder="Type stop city..."
-                          />
+                      <div key={index} className="p-3 border border-border rounded-lg space-y-2">
+                        <div className="flex items-end gap-3">
+                          <div className="flex-1 space-y-1">
+                            <Label className="text-xs">Stop {index + 1}</Label>
+                            <LocationInput
+                              value={stop.city}
+                              onChange={(val, result) => {
+                                updateStop(index, 'city', val);
+                                setStopCoords(prev => {
+                                  const next = [...prev];
+                                  next[index] = result?.coordinates || null;
+                                  return next;
+                                });
+                              }}
+                              placeholder="Type stop city or address..."
+                            />
+                          </div>
+                          <div className="w-28 space-y-1">
+                            <Label className="text-xs">Price (€)</Label>
+                            <Input
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              value={stop.price_from_start}
+                              onChange={(e) => updateStop(index, 'price_from_start', e.target.value)}
+                              placeholder="€"
+                            />
+                          </div>
+                          <Button type="button" variant="ghost" size="sm" onClick={() => {
+                            removeStop(index);
+                            setStopCoords(prev => prev.filter((_, i) => i !== index));
+                          }}>
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
                         </div>
-                        <div className="w-28 space-y-1">
-                          <Label className="text-xs">Price (€)</Label>
-                          <Input
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            value={stop.price_from_start}
-                            onChange={(e) => updateStop(index, 'price_from_start', e.target.value)}
-                            placeholder="€"
-                          />
-                        </div>
-                        <Button type="button" variant="ghost" size="sm" onClick={() => removeStop(index)}>
-                          <Trash2 className="h-4 w-4 text-destructive" />
+                        <Button
+                          type="button"
+                          variant={mapSelectMode === `stop-${index}` ? 'default' : 'outline'}
+                          size="sm"
+                          className="w-full"
+                          onClick={() => setMapSelectMode(mapSelectMode === `stop-${index}` ? null : `stop-${index}`)}
+                        >
+                          <MapPin className="h-3 w-3 mr-1" />
+                          {mapSelectMode === `stop-${index}` ? 'Click on the map...' : 'Pick on map'}
                         </Button>
                       </div>
                     ))}
