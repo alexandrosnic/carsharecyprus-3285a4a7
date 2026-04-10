@@ -52,28 +52,57 @@ const LocationInput: React.FC<LocationInputProps> = ({ value, onChange, placehol
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const searchMapbox = useCallback(async (query: string) => {
-    if (!mapboxToken || query.length < 2) return;
-    setLoading(true);
+  const searchNominatim = useCallback(async (query: string): Promise<LocationResult[]> => {
     try {
-      // Use bbox to bias results towards Cyprus but don't restrict with country=cy
-      // so POIs (shops, landmarks) indexed under different country codes still appear
-      const bbox = '32.0,34.4,34.7,35.75';
       const res = await fetch(
-        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${mapboxToken}&bbox=${bbox}&limit=7&types=place,locality,neighborhood,address,poi&proximity=33.38,35.17`
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&addressdetails=1&limit=5&viewbox=32.0,35.75,34.7,34.4&bounded=1`,
+        { headers: { 'Accept-Language': 'en' } }
       );
       const data = await res.json();
-      const mapboxResults: LocationResult[] = (data.features || []).map((f: any) => ({
-        label: f.place_name || f.text,
-        fullAddress: f.place_name,
-        coordinates: f.center as [number, number],
+      return (data || []).map((item: any) => ({
+        label: item.display_name,
+        fullAddress: item.display_name,
+        coordinates: [parseFloat(item.lon), parseFloat(item.lat)] as [number, number],
       }));
+    } catch (err) {
+      console.error('Nominatim error:', err);
+      return [];
+    }
+  }, []);
+
+  const searchMapbox = useCallback(async (query: string) => {
+    if (query.length < 2) return;
+    setLoading(true);
+    try {
+      // Search Mapbox (addresses & places)
+      let mapboxResults: LocationResult[] = [];
+      if (mapboxToken) {
+        const bbox = '32.0,34.4,34.7,35.75';
+        const res = await fetch(
+          `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${mapboxToken}&bbox=${bbox}&limit=5&types=place,locality,neighborhood,address,poi&proximity=33.38,35.17`
+        );
+        const data = await res.json();
+        mapboxResults = (data.features || []).map((f: any) => ({
+          label: f.place_name || f.text,
+          fullAddress: f.place_name,
+          coordinates: f.center as [number, number],
+        }));
+      }
+
+      // Search Nominatim (better POI coverage - shops, landmarks, etc.)
+      const nominatimResults = await searchNominatim(query);
+
+      // Merge results: city matches first, then Mapbox, then Nominatim (deduplicated)
       const cityMatches: LocationResult[] = cities
         .filter(c => c.toLowerCase().includes(query.toLowerCase()))
         .map(c => ({ label: c, fullAddress: c }));
+
       const seen = new Set(cityMatches.map(s => s.label.toLowerCase()));
-      const unique = mapboxResults.filter(s => !seen.has(s.label.toLowerCase()));
-      setSuggestions([...cityMatches, ...unique]);
+      const uniqueMapbox = mapboxResults.filter(s => !seen.has(s.label.toLowerCase()));
+      uniqueMapbox.forEach(s => seen.add(s.label.toLowerCase()));
+      const uniqueNominatim = nominatimResults.filter(s => !seen.has(s.label.toLowerCase()));
+
+      setSuggestions([...cityMatches, ...uniqueMapbox, ...uniqueNominatim].slice(0, 8));
     } catch (err) {
       console.error('Geocoding error:', err);
     } finally {
