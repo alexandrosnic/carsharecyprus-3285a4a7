@@ -14,7 +14,7 @@ import { ArrowLeft, Car, MapPin, Calendar, Users, DollarSign, Plus, Clock, Trash
 import { toast } from 'sonner';
 import { getEstimatedDuration, formatDuration } from '@/constants/travelTimes';
 import LocationInput, { LocationResult } from '@/components/LocationInput';
-import ClickableMap from '@/components/ClickableMap';
+import ClickableMap, { MapMarkerData } from '@/components/ClickableMap';
 
 interface RideFormData {
   departure_city: string;
