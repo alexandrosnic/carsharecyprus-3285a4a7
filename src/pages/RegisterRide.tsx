@@ -24,6 +24,8 @@ interface RideFormData {
   smoking_allowed: boolean;
   pets_allowed: boolean;
   return_ride: boolean;
+  vehicle_make: string;
+  vehicle_color: string;
 }
 
 const cities = [
@@ -46,6 +48,8 @@ const RegisterRide = () => {
     smoking_allowed: false,
     pets_allowed: false,
     return_ride: false,
+    vehicle_make: '',
+    vehicle_color: '',
   });
 
   const handleInputChange = (field: keyof RideFormData, value: string | number | boolean) => {
@@ -90,7 +94,12 @@ const RegisterRide = () => {
           available_seats: formData.available_seats,
           price_per_seat: parseFloat(formData.price_per_seat),
           description: formData.description,
-          status: 'active'
+          status: 'active',
+          vehicle_make: formData.vehicle_make || null,
+          vehicle_color: formData.vehicle_color || null,
+          smoking_allowed: formData.smoking_allowed,
+          pets_allowed: formData.pets_allowed,
+          luggage_size: formData.luggage_size || 'medium',
         });
 
       if (error) throw error;

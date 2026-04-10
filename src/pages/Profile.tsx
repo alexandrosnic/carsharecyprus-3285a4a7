@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { ArrowLeft, Camera, Star, User, Phone, Mail, Save, Shield } from 'lucide-react';
+import { ArrowLeft, Camera, Star, User, Phone, Mail, Save, Shield, Loader2 } from 'lucide-react';
 import { BRAND_LOGO } from '@/constants/brand';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -25,8 +25,10 @@ interface ProfileData {
 const Profile = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [profileData, setProfileData] = useState<ProfileData>({
     full_name: '',
     phone_number: '',
@@ -54,13 +56,73 @@ const Profile = () => {
       }
 
       if (data) {
-        setProfileData(data);
+        setProfileData({
+          id: data.id,
+          full_name: data.full_name || '',
+          phone_number: data.phone_number || '',
+          avatar_url: data.avatar_url || '',
+          rating: data.rating || 5.0,
+          total_rides: data.total_rides || 0,
+        });
       }
     } catch (error: any) {
       console.error('Error fetching profile:', error);
       toast.error('Failed to load profile');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !user) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select an image file');
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('Image must be smaller than 2MB');
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const filePath = `${user.id}/avatar.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      // Add cache buster
+      const avatarUrl = `${publicUrl}?t=${Date.now()}`;
+
+      setProfileData(prev => ({ ...prev, avatar_url: avatarUrl }));
+
+      // Save immediately
+      await supabase
+        .from('profiles')
+        .upsert({
+          user_id: user.id,
+          avatar_url: avatarUrl,
+          full_name: profileData.full_name,
+          updated_at: new Date().toISOString(),
+        });
+
+      toast.success('Profile photo updated!');
+    } catch (error: any) {
+      console.error('Error uploading avatar:', error);
+      toast.error('Failed to upload photo');
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -114,7 +176,6 @@ const Profile = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
-      {/* Header */}
       <header className="bg-white dark:bg-gray-800 shadow-sm border-b">
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-4">
@@ -132,7 +193,6 @@ const Profile = () => {
         </div>
       </header>
 
-      {/* Main Content */}
       <main className="max-w-4xl mx-auto px-4 py-8">
         <div className="grid gap-8">
           {/* Profile Overview Card */}
@@ -146,12 +206,25 @@ const Profile = () => {
                       {profileData.full_name.split(' ').map(n => n[0]).join('')}
                     </AvatarFallback>
                   </Avatar>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleAvatarUpload}
+                  />
                   <Button
                     size="sm"
                     variant="outline"
                     className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full p-0"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
                   >
-                    <Camera className="h-4 w-4" />
+                    {uploading ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Camera className="h-4 w-4" />
+                    )}
                   </Button>
                 </div>
                 <div className="flex-1">
@@ -219,20 +292,6 @@ const Profile = () => {
                     />
                   </div>
                   <p className="text-sm text-muted-foreground">Email cannot be changed</p>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="avatar_url">Profile Picture URL</Label>
-                  <div className="relative">
-                    <Camera className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="avatar_url"
-                      value={profileData.avatar_url}
-                      onChange={(e) => handleInputChange('avatar_url', e.target.value)}
-                      className="pl-9"
-                      placeholder="https://example.com/avatar.jpg"
-                    />
-                  </div>
                 </div>
               </div>
 
