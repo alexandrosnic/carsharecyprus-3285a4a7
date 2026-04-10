@@ -50,6 +50,7 @@ const App = () => (
                 <Route path="/chat/:rideId" element={<Chat />} />
                 <Route path="/payment-history" element={<PaymentHistory />} />
                 <Route path="/dispute" element={<DisputeResolution />} />
+                <Route path="/privacy" element={<Privacy />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
