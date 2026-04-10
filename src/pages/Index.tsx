@@ -42,8 +42,25 @@ const Index = () => {
   }, [user, loading, navigate]);
 
   useEffect(() => {
-    if (user) fetchUpcomingRides();
+    if (user) {
+      expirePastRides();
+      fetchUpcomingRides();
+    }
   }, [user]);
+
+  const expirePastRides = async () => {
+    try {
+      // Mark rides as completed if departure_time has passed
+      await supabase
+        .from('rides')
+        .update({ status: 'completed' })
+        .eq('status', 'active')
+        .eq('driver_id', user!.id)
+        .lt('departure_time', new Date().toISOString());
+    } catch (error) {
+      console.error('Error expiring rides:', error);
+    }
+  };
 
   const fetchUpcomingRides = async () => {
     try {

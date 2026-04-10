@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { ArrowLeft, Camera, Star, User, Phone, Mail, Save, Shield, Loader2 } from 'lucide-react';
+import { ArrowLeft, Camera, Star, User, Phone, Mail, Save, Shield, Loader2, MessageSquare } from 'lucide-react';
 import { BRAND_LOGO } from '@/constants/brand';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -22,6 +22,14 @@ interface ProfileData {
   total_rides: number;
 }
 
+interface Review {
+  id: string;
+  rating: number;
+  comment: string | null;
+  created_at: string;
+  rater_name: string;
+}
+
 const Profile = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -29,6 +37,7 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [reviews, setReviews] = useState<Review[]>([]);
   const [profileData, setProfileData] = useState<ProfileData>({
     full_name: '',
     phone_number: '',
@@ -40,8 +49,41 @@ const Profile = () => {
   useEffect(() => {
     if (user) {
       fetchProfile();
+      fetchReviews();
     }
   }, [user]);
+
+  const fetchReviews = async () => {
+    if (!user) return;
+    try {
+      const { data: ratingsData, error } = await supabase
+        .from('ratings')
+        .select('id, rating, comment, created_at, rater_id')
+        .eq('rated_user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      if (error) throw error;
+
+      if (ratingsData && ratingsData.length > 0) {
+        const raterIds = ratingsData.map(r => r.rater_id);
+        const { data: profiles } = await supabase
+          .from('safe_profiles')
+          .select('user_id, full_name')
+          .in('user_id', raterIds);
+
+        setReviews(ratingsData.map(r => ({
+          id: r.id,
+          rating: r.rating,
+          comment: r.comment,
+          created_at: r.created_at,
+          rater_name: profiles?.find(p => p.user_id === r.rater_id)?.full_name || 'Anonymous',
+        })));
+      }
+    } catch (error) {
+      console.error('Error fetching reviews:', error);
+    }
+  };
 
   const fetchProfile = async () => {
     try {
@@ -362,6 +404,46 @@ const Profile = () => {
                   <div className="text-sm text-muted-foreground">Average Rating</div>
                 </div>
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Reviews */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <MessageSquare className="h-5 w-5" />
+                Recent Reviews
+              </CardTitle>
+              <CardDescription>What others say about you</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {reviews.length === 0 ? (
+                <p className="text-center text-muted-foreground py-4">No reviews yet</p>
+              ) : (
+                <div className="space-y-4">
+                  {reviews.map((review) => (
+                    <div key={review.id} className="border-b last:border-0 pb-4 last:pb-0">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="font-medium text-sm">{review.rater_name}</span>
+                        <div className="flex items-center gap-1">
+                          {Array.from({ length: 5 }).map((_, i) => (
+                            <Star
+                              key={i}
+                              className={`h-3 w-3 ${i < review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground'}`}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                      {review.comment && (
+                        <p className="text-sm text-muted-foreground">{review.comment}</p>
+                      )}
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {new Date(review.created_at).toLocaleDateString('en-GB', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
