@@ -6,7 +6,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Clock, MapPin, Star, Users, Car, Filter } from "lucide-react";
+import { ArrowLeft, Clock, MapPin, Star, Users, Car, Filter, Cigarette, PawPrint, Briefcase } from "lucide-react";
+import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface Ride {
@@ -21,6 +22,11 @@ interface Ride {
   status: string;
   created_at: string;
   updated_at: string;
+  vehicle_make: string | null;
+  vehicle_color: string | null;
+  smoking_allowed: boolean | null;
+  pets_allowed: boolean | null;
+  luggage_size: string | null;
   driver_profile?: {
     full_name: string;
     avatar_url: string;
@@ -328,6 +334,23 @@ const SearchResults = () => {
                           <Users className="h-4 w-4" />
                           <span>{ride.available_seats} seat{ride.available_seats > 1 ? 's' : ''} available</span>
                         </div>
+                        {ride.vehicle_make && (
+                          <span className="text-xs text-muted-foreground">
+                            {ride.vehicle_color} {ride.vehicle_make}
+                          </span>
+                        )}
+                      </div>
+                      {/* Ride preferences */}
+                      <div className="flex gap-1 mt-1">
+                        {ride.smoking_allowed && (
+                          <Badge variant="outline" className="text-xs py-0"><Cigarette className="h-3 w-3 mr-1" />Smoking OK</Badge>
+                        )}
+                        {ride.pets_allowed && (
+                          <Badge variant="outline" className="text-xs py-0"><PawPrint className="h-3 w-3 mr-1" />Pets OK</Badge>
+                        )}
+                        {ride.luggage_size && ride.luggage_size !== 'medium' && (
+                          <Badge variant="outline" className="text-xs py-0"><Briefcase className="h-3 w-3 mr-1" />{ride.luggage_size} luggage</Badge>
+                        )}
                       </div>
                     </div>
 
