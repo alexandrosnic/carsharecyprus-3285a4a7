@@ -10,6 +10,7 @@ import { Separator } from '@/components/ui/separator';
 import { ArrowLeft, MapPin, Clock, Users, Star, Phone, MessageCircle, Car, DollarSign, Cigarette, PawPrint, Briefcase } from 'lucide-react';
 import { toast } from 'sonner';
 import Map from '@/components/Map';
+import { getEstimatedDuration, formatDuration } from '@/constants/travelTimes';
 
 interface RideDetails {
   id: string;
@@ -42,6 +43,7 @@ const RideDetails = () => {
   const [ride, setRide] = useState<RideDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [booking, setBooking] = useState(false);
+  const [stops, setStops] = useState<{ city: string; stop_order: number; price_from_start: number | null }[]>([]);
 
   useEffect(() => {
     if (rideId) {
@@ -78,6 +80,15 @@ const RideDetails = () => {
         ...rideData,
         driver_profile: profileData
       });
+
+      // Fetch stops
+      const { data: stopsData } = await supabase
+        .from('ride_stops')
+        .select('city, stop_order, price_from_start')
+        .eq('ride_id', rideId)
+        .order('stop_order', { ascending: true });
+
+      if (stopsData) setStops(stopsData);
     } catch (error: any) {
       console.error('Error fetching ride details:', error);
       toast.error('Failed to load ride details');
