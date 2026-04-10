@@ -113,8 +113,8 @@ const Index = () => {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
-      <header className="bg-white dark:bg-gray-800 shadow-sm border-b">
+    <div className="min-h-screen bg-background">
+      <header className="bg-card shadow-sm border-b border-border">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <img src="/lovable-uploads/834c900c-913f-46a2-b82c-ee88234635ae.png" alt="Car Share Cyprus Logo" className="h-8" />
@@ -141,13 +141,13 @@ const Index = () => {
 
         {/* Action Cards */}
         <div className="grid md:grid-cols-2 gap-8 mb-12">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 text-center hover:shadow-xl transition-shadow">
+          <div className="bg-card rounded-lg shadow-lg p-8 text-center hover:shadow-xl transition-shadow">
             <Plus className="h-16 w-16 text-primary mx-auto mb-4" />
             <h3 className="text-2xl font-bold mb-4 text-foreground">Offer a Ride</h3>
             <p className="text-muted-foreground mb-6">Share your journey and earn money while helping others</p>
             <Button size="lg" className="w-full" onClick={() => navigate('/register-ride')}>Create Ride</Button>
           </div>
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 text-center hover:shadow-xl transition-shadow">
+          <div className="bg-card rounded-lg shadow-lg p-8 text-center hover:shadow-xl transition-shadow">
             <Search className="h-16 w-16 text-primary mx-auto mb-4" />
             <h3 className="text-2xl font-bold mb-4 text-foreground">Find a Ride</h3>
             <p className="text-muted-foreground mb-6">Search for rides to your destination at great prices</p>
@@ -156,7 +156,7 @@ const Index = () => {
         </div>
 
         {/* Upcoming Rides Feed */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
+        <div className="bg-card rounded-lg shadow-lg p-8">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-2xl font-bold text-foreground">Upcoming Rides</h3>
             <Button variant="outline" size="sm" onClick={() => navigate('/find-ride')}>View All</Button>
