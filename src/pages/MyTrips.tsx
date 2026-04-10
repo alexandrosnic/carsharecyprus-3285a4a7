@@ -183,6 +183,46 @@ const MyTrips = () => {
     }
   };
 
+  const handleCancelRide = async (rideId: string) => {
+    if (!confirm('Are you sure you want to cancel this ride? All pending bookings will be cancelled.')) return;
+    try {
+      const { error } = await supabase
+        .from('rides')
+        .update({ status: 'cancelled' })
+        .eq('id', rideId)
+        .eq('driver_id', user?.id);
+
+      if (error) throw error;
+      toast.success('Ride cancelled');
+      fetchTrips();
+    } catch (error: any) {
+      console.error('Error cancelling ride:', error);
+      toast.error('Failed to cancel ride');
+    }
+  };
+
+  const handleCancelBooking = async (bookingId: string) => {
+    if (!confirm('Are you sure you want to cancel this booking?')) return;
+    try {
+      const { error } = await supabase
+        .from('bookings')
+        .update({ 
+          status: 'cancelled',
+          cancelled_at: new Date().toISOString(),
+          cancellation_reason: 'Cancelled by passenger'
+        })
+        .eq('id', bookingId)
+        .eq('passenger_id', user?.id);
+
+      if (error) throw error;
+      toast.success('Booking cancelled');
+      fetchTrips();
+    } catch (error: any) {
+      console.error('Error cancelling booking:', error);
+      toast.error('Failed to cancel booking');
+    }
+  };
+
   const formatDateTime = (timeString: string) => {
     const date = new Date(timeString);
     const now = new Date();
