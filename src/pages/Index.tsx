@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Plus, Search, User, MapPin, Clock, Star, Users, Cigarette, PawPrint, Briefcase } from 'lucide-react';
 import { BRAND_LOGO } from '@/constants/brand';
 import { NotificationCenter } from '@/components/notifications/NotificationCenter';
+import { getEstimatedDuration, formatDuration } from '@/constants/travelTimes';
 
 interface RideFeed {
   id: string;
