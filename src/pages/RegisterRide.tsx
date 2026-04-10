@@ -13,7 +13,8 @@ import { Separator } from '@/components/ui/separator';
 import { ArrowLeft, Car, MapPin, Calendar, Users, DollarSign, Plus, Clock, Trash2, Repeat, RotateCcw } from 'lucide-react';
 import { toast } from 'sonner';
 import { getEstimatedDuration, formatDuration } from '@/constants/travelTimes';
-import LocationInput from '@/components/LocationInput';
+import LocationInput, { LocationResult } from '@/components/LocationInput';
+import Map from '@/components/Map';
 
 interface RideFormData {
   departure_city: string;
@@ -47,6 +48,8 @@ const RegisterRide = () => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [stops, setStops] = useState<StopData[]>([]);
+  const [departureCoords, setDepartureCoords] = useState<[number, number] | null>(null);
+  const [arrivalCoords, setArrivalCoords] = useState<[number, number] | null>(null);
   const [formData, setFormData] = useState<RideFormData>({
     departure_city: '',
     arrival_city: '',
@@ -314,12 +317,28 @@ const RegisterRide = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
+              {/* Route Map Preview */}
+              {(departureCoords || arrivalCoords) && (
+                <Map
+                  className="w-full h-48 rounded-lg border border-border"
+                  center={departureCoords || arrivalCoords || [33.3792, 35.1872]}
+                  zoom={arrivalCoords && departureCoords ? 8 : 12}
+                  markers={[
+                    ...(departureCoords ? [{ coordinates: departureCoords, title: 'From', description: formData.departure_city }] : []),
+                    ...(arrivalCoords ? [{ coordinates: arrivalCoords, title: 'To', description: formData.arrival_city }] : []),
+                  ]}
+                />
+              )}
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>From *</Label>
                   <LocationInput
                     value={formData.departure_city}
-                    onChange={(val) => handleInputChange('departure_city', val)}
+                    onChange={(val, result) => {
+                      handleInputChange('departure_city', val);
+                      setDepartureCoords(result?.coordinates || null);
+                    }}
                     placeholder="Type city or address..."
                   />
                 </div>
@@ -327,7 +346,10 @@ const RegisterRide = () => {
                   <Label>To *</Label>
                   <LocationInput
                     value={formData.arrival_city}
-                    onChange={(val) => handleInputChange('arrival_city', val)}
+                    onChange={(val, result) => {
+                      handleInputChange('arrival_city', val);
+                      setArrivalCoords(result?.coordinates || null);
+                    }}
                     placeholder="Type destination or address..."
                   />
                 </div>

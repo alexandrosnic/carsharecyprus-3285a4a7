@@ -10,14 +10,15 @@ const cities = [
   'Protaras', 'Ayia Napa', 'Troodos', 'Polis', 'Paralimni'
 ];
 
-interface Suggestion {
+export interface LocationResult {
   label: string;
-  sublabel?: string;
+  fullAddress: string;
+  coordinates?: [number, number]; // [lng, lat]
 }
 
 interface LocationInputProps {
   value: string;
-  onChange: (value: string) => void;
+  onChange: (value: string, result?: LocationResult) => void;
   placeholder?: string;
   className?: string;
 }
@@ -25,14 +26,13 @@ interface LocationInputProps {
 const LocationInput: React.FC<LocationInputProps> = ({ value, onChange, placeholder = 'Type city or address...', className }) => {
   const [inputValue, setInputValue] = useState(value);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const [suggestions, setSuggestions] = useState<LocationResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [mapboxToken, setMapboxToken] = useState<string | null>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
   const { session } = useAuth();
 
-  // Fetch mapbox token once
   useEffect(() => {
     if (!session) return;
     supabase.functions.invoke('get-mapbox-token').then(({ data, error }) => {
@@ -56,25 +56,24 @@ const LocationInput: React.FC<LocationInputProps> = ({ value, onChange, placehol
     if (!mapboxToken || query.length < 2) return;
     setLoading(true);
     try {
-      const bbox = '32.0,34.5,34.6,35.7'; // Cyprus bounding box
+      const bbox = '32.0,34.5,34.6,35.7';
       const res = await fetch(
-        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${mapboxToken}&bbox=${bbox}&limit=5&types=place,locality,neighborhood,address,poi`
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${mapboxToken}&bbox=${bbox}&limit=5&types=place,locality,neighborhood,address,poi&country=cy`
       );
       const data = await res.json();
       if (data.features?.length) {
-        const mapboxSuggestions: Suggestion[] = data.features.map((f: any) => ({
-          label: f.text,
-          sublabel: f.place_name,
+        const mapboxResults: LocationResult[] = data.features.map((f: any) => ({
+          label: f.place_name || f.text,
+          fullAddress: f.place_name,
+          coordinates: f.center as [number, number],
         }));
-        setSuggestions(prev => {
-          // Merge: city matches first, then mapbox results (deduplicated)
-          const cityMatches = cities
-            .filter(c => c.toLowerCase().includes(query.toLowerCase()))
-            .map(c => ({ label: c }));
-          const seen = new Set(cityMatches.map(s => s.label.toLowerCase()));
-          const unique = mapboxSuggestions.filter(s => !seen.has(s.label.toLowerCase()));
-          return [...cityMatches, ...unique];
-        });
+        // Merge city matches first, then mapbox
+        const cityMatches: LocationResult[] = cities
+          .filter(c => c.toLowerCase().includes(query.toLowerCase()))
+          .map(c => ({ label: c, fullAddress: c }));
+        const seen = new Set(cityMatches.map(s => s.label.toLowerCase()));
+        const unique = mapboxResults.filter(s => !seen.has(s.label.toLowerCase()));
+        setSuggestions([...cityMatches, ...unique]);
       }
     } catch (err) {
       console.error('Geocoding error:', err);
@@ -87,23 +86,20 @@ const LocationInput: React.FC<LocationInputProps> = ({ value, onChange, placehol
     setInputValue(val);
     setShowSuggestions(true);
 
-    // Immediate city filter
-    const cityMatches = cities
+    const cityMatches: LocationResult[] = cities
       .filter(c => c.toLowerCase().includes(val.toLowerCase()))
-      .map(c => ({ label: c }));
+      .map(c => ({ label: c, fullAddress: c }));
     setSuggestions(cityMatches);
 
-    // Debounced mapbox search
     if (debounceRef.current) clearTimeout(debounceRef.current);
     if (val.length >= 2 && mapboxToken) {
       debounceRef.current = setTimeout(() => searchMapbox(val), 350);
     }
   };
 
-  const selectSuggestion = (suggestion: Suggestion) => {
-    const selected = suggestion.sublabel || suggestion.label;
+  const selectSuggestion = (suggestion: LocationResult) => {
     setInputValue(suggestion.label);
-    onChange(selected);
+    onChange(suggestion.fullAddress, suggestion);
     setShowSuggestions(false);
   };
 
@@ -122,7 +118,10 @@ const LocationInput: React.FC<LocationInputProps> = ({ value, onChange, placehol
         <Input
           value={inputValue}
           onChange={(e) => handleInputChange(e.target.value)}
-          onFocus={() => { if (inputValue) handleInputChange(inputValue); else { setSuggestions(cities.map(c => ({ label: c }))); setShowSuggestions(true); } }}
+          onFocus={() => {
+            if (inputValue) handleInputChange(inputValue);
+            else { setSuggestions(cities.map(c => ({ label: c, fullAddress: c }))); setShowSuggestions(true); }
+          }}
           onBlur={handleBlur}
           placeholder={placeholder}
           className="pl-9 pr-9"
@@ -146,12 +145,7 @@ const LocationInput: React.FC<LocationInputProps> = ({ value, onChange, placehol
               onClick={() => selectSuggestion(s)}
             >
               <MapPin className="h-3 w-3 text-muted-foreground flex-shrink-0 mt-0.5" />
-              <div className="min-w-0">
-                <div className="font-medium truncate">{s.label}</div>
-                {s.sublabel && s.sublabel !== s.label && (
-                  <div className="text-xs text-muted-foreground truncate">{s.sublabel}</div>
-                )}
-              </div>
+              <span className="truncate">{s.label}</span>
             </button>
           ))}
         </div>
