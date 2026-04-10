@@ -210,7 +210,8 @@ const RideDetails = () => {
                 </div>
                 <div className="text-right">
                   <div className="text-3xl font-bold text-primary">€{ride.price_per_seat}</div>
-                  <div className="text-sm text-muted-foreground">per person</div>
+                  <div className="text-sm text-muted-foreground">per seat</div>
+                  <div className="text-xs text-muted-foreground">incl. 10% service fee</div>
                 </div>
               </div>
 
