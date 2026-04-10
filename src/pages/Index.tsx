@@ -188,6 +188,14 @@ const Index = () => {
                           <span className="font-medium">{ride.departure_city}</span>
                           <span className="text-muted-foreground">→</span>
                           <span className="font-medium">{ride.arrival_city}</span>
+                          {(() => {
+                            const dur = getEstimatedDuration(ride.departure_city, ride.arrival_city);
+                            return dur ? (
+                              <Badge variant="outline" className="text-xs py-0 ml-1">
+                                <Clock className="h-3 w-3 mr-1" />{formatDuration(dur)}
+                              </Badge>
+                            ) : null;
+                          })()}
                         </div>
                         <div className="flex items-center flex-wrap gap-3 text-sm text-muted-foreground">
                           <span className="flex items-center gap-1">
