@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { ArrowLeft, Clock, MapPin, Star, Users, Car, Filter, Cigarette, PawPrint, Briefcase } from "lucide-react";
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { getEstimatedDuration, formatDuration } from '@/constants/travelTimes';
 
 interface Ride {
   id: string;
@@ -331,6 +332,14 @@ const SearchResults = () => {
                           <span className="text-muted-foreground">→</span>
                           <span className="font-medium">{ride.arrival_city}</span>
                         </div>
+                        {(() => {
+                          const duration = getEstimatedDuration(ride.departure_city, ride.arrival_city);
+                          return duration ? (
+                            <Badge variant="outline" className="text-xs py-0">
+                              <Clock className="h-3 w-3 mr-1" />{formatDuration(duration)}
+                            </Badge>
+                          ) : null;
+                        })()}
                       </div>
                       
                       <div className="flex items-center space-x-4 text-sm text-muted-foreground">

@@ -330,6 +330,41 @@ export type Database = {
         }
         Relationships: []
       }
+      ride_stops: {
+        Row: {
+          city: string
+          created_at: string
+          id: string
+          price_from_start: number | null
+          ride_id: string
+          stop_order: number
+        }
+        Insert: {
+          city: string
+          created_at?: string
+          id?: string
+          price_from_start?: number | null
+          ride_id: string
+          stop_order: number
+        }
+        Update: {
+          city?: string
+          created_at?: string
+          id?: string
+          price_from_start?: number | null
+          ride_id?: string
+          stop_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ride_stops_ride_id_fkey"
+            columns: ["ride_id"]
+            isOneToOne: false
+            referencedRelation: "rides"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rides: {
         Row: {
           arrival_city: string
@@ -340,9 +375,12 @@ export type Database = {
           description: string | null
           driver_id: string
           id: string
+          is_recurring: boolean | null
           luggage_size: string | null
           pets_allowed: boolean | null
           price_per_seat: number
+          recurrence_end_date: string | null
+          recurrence_pattern: string | null
           smoking_allowed: boolean | null
           status: string | null
           updated_at: string
@@ -358,9 +396,12 @@ export type Database = {
           description?: string | null
           driver_id: string
           id?: string
+          is_recurring?: boolean | null
           luggage_size?: string | null
           pets_allowed?: boolean | null
           price_per_seat: number
+          recurrence_end_date?: string | null
+          recurrence_pattern?: string | null
           smoking_allowed?: boolean | null
           status?: string | null
           updated_at?: string
@@ -376,9 +417,12 @@ export type Database = {
           description?: string | null
           driver_id?: string
           id?: string
+          is_recurring?: boolean | null
           luggage_size?: string | null
           pets_allowed?: boolean | null
           price_per_seat?: number
+          recurrence_end_date?: string | null
+          recurrence_pattern?: string | null
           smoking_allowed?: boolean | null
           status?: string | null
           updated_at?: string
