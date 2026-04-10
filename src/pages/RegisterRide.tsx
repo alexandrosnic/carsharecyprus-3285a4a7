@@ -13,7 +13,8 @@ import { Separator } from '@/components/ui/separator';
 import { ArrowLeft, Car, MapPin, Calendar, Users, DollarSign, Plus, Clock, Trash2, Repeat, RotateCcw } from 'lucide-react';
 import { toast } from 'sonner';
 import { getEstimatedDuration, formatDuration } from '@/constants/travelTimes';
-import LocationInput from '@/components/LocationInput';
+import LocationInput, { LocationResult } from '@/components/LocationInput';
+import Map from '@/components/Map';
 
 interface RideFormData {
   departure_city: string;
