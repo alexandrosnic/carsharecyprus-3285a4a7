@@ -171,6 +171,7 @@ const RideDetails = () => {
 
   const { date, time } = formatDateTime(ride.departure_time);
   const isOwnRide = user?.id === ride.driver_profile?.user_id;
+  const estimatedDuration = getEstimatedDuration(ride.departure_city, ride.arrival_city);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
@@ -238,6 +239,36 @@ const RideDetails = () => {
                   </div>
                 </div>
               </div>
+              {/* Estimated Duration */}
+              {estimatedDuration && (
+                <div className="mt-4 flex items-center gap-2 p-3 bg-accent/50 rounded-lg">
+                  <Clock className="h-4 w-4 text-primary" />
+                  <span className="text-sm font-medium">Estimated trip: {formatDuration(estimatedDuration)}</span>
+                </div>
+              )}
+
+              {/* Intermediate Stops */}
+              {stops.length > 0 && (
+                <div className="mt-4">
+                  <h4 className="text-sm font-medium mb-2">Route Stops</h4>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Badge variant="secondary">{ride.departure_city}</Badge>
+                    {stops.map((stop) => (
+                      <React.Fragment key={stop.stop_order}>
+                        <span className="text-muted-foreground">→</span>
+                        <Badge variant="outline">
+                          {stop.city}
+                          {stop.price_from_start != null && (
+                            <span className="ml-1 text-xs text-muted-foreground">€{stop.price_from_start}</span>
+                          )}
+                        </Badge>
+                      </React.Fragment>
+                    ))}
+                    <span className="text-muted-foreground">→</span>
+                    <Badge variant="secondary">{ride.arrival_city}</Badge>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
 
