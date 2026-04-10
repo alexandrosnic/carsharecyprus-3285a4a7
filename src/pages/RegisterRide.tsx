@@ -178,6 +178,26 @@ const RegisterRide = () => {
       }
 
       toast.success('Ride created successfully!');
+
+      // Check if driver has Stripe Connect set up
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('stripe_onboarding_complete')
+        .eq('user_id', user.id)
+        .single();
+
+      if (!profile?.stripe_onboarding_complete) {
+        // Prompt driver to set up payouts
+        toast('Set up payouts to receive your earnings!', {
+          description: 'Connect your bank account to get paid when passengers book your rides.',
+          action: {
+            label: 'Set Up Now',
+            onClick: () => navigate('/profile?setup_payouts=true'),
+          },
+          duration: 10000,
+        });
+      }
+
       navigate('/my-trips');
     } catch (error: any) {
       console.error('Error creating ride:', error);
