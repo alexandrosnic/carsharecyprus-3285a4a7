@@ -178,11 +178,11 @@ const DriverVerification = () => {
           </Card>
 
           {verification.verification_status === 'rejected' && verification.admin_notes && (
-            <Card className="border-red-200 bg-red-50">
+            <Card className="border-destructive">
               <CardContent className="pt-6">
-                <h4 className="font-medium text-red-800 mb-2">Verification Rejected</h4>
-                <p className="text-red-700 text-sm">{verification.admin_notes}</p>
-                <p className="text-red-600 text-xs mt-2">Please update your information and resubmit.</p>
+                <h4 className="font-medium text-destructive mb-2">Verification Rejected</h4>
+                <p className="text-destructive/80 text-sm">{verification.admin_notes}</p>
+                <p className="text-destructive/60 text-xs mt-2">Please update your information and resubmit.</p>
               </CardContent>
             </Card>
           )}
@@ -261,9 +261,9 @@ const DriverVerification = () => {
                   />
                 </div>
 
-                <div className="bg-blue-50 p-4 rounded-lg">
-                  <h4 className="font-medium text-blue-800 mb-2">Verification Requirements</h4>
-                  <ul className="text-sm text-blue-700 space-y-1">
+                <div className="bg-accent/30 p-4 rounded-lg">
+                  <h4 className="font-medium text-foreground mb-2">Verification Requirements</h4>
+                  <ul className="text-sm text-muted-foreground space-y-1">
                     <li>• Valid driver's license (not expired)</li>
                     <li>• Current vehicle registration documents</li>
                     <li>• Valid insurance certificate</li>
