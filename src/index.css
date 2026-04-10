@@ -105,7 +105,17 @@ All colors MUST be HSL.
     @apply border-border;
   }
 
+  html {
+    background-color: hsl(var(--background));
+    color-scheme: dark;
+  }
+
   body {
     @apply bg-background text-foreground;
+    min-height: 100vh;
+  }
+
+  #root {
+    min-height: 100vh;
   }
 }

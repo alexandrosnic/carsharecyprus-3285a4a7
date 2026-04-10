@@ -30,17 +30,22 @@ document.head.appendChild(viewportMeta);
 // Theme Color Meta Tags
 const themeColorMeta = document.createElement('meta');
 themeColorMeta.name = 'theme-color';
-themeColorMeta.content = '#FFD95A'; // Golden yellow from our palette
+themeColorMeta.content = '#282d33';
 document.head.appendChild(themeColorMeta);
 
 const appleStatusBarMeta = document.createElement('meta');
 appleStatusBarMeta.name = 'apple-mobile-web-app-status-bar-style';
-appleStatusBarMeta.content = 'default';
+appleStatusBarMeta.content = 'black-translucent';
 document.head.appendChild(appleStatusBarMeta);
 
 const appleCapableMeta = document.createElement('meta');
 appleCapableMeta.name = 'apple-mobile-web-app-capable';
 appleCapableMeta.content = 'yes';
 document.head.appendChild(appleCapableMeta);
+
+document.documentElement.style.backgroundColor = '#282d33';
+document.documentElement.style.colorScheme = 'dark';
+document.body.style.backgroundColor = '#282d33';
+document.body.style.minHeight = '100vh';
 
 createRoot(document.getElementById("root")!).render(<App />);

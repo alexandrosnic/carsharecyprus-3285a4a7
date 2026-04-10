@@ -4,8 +4,8 @@
   "description": "Find and share rides across Cyprus",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#2D3748",
-  "theme_color": "#FFD95A",
+  "background_color": "#282d33",
+  "theme_color": "#282d33",
   "orientation": "portrait-primary",
   "icons": [
     {

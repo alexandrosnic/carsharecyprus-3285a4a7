@@ -12,7 +12,7 @@ export const LoadingFallback: React.FC<LoadingFallbackProps> = ({
   fullScreen = false 
 }) => {
   const containerClasses = fullScreen 
-    ? "min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800"
+    ? "min-h-screen flex items-center justify-center bg-background text-foreground"
     : "flex items-center justify-center p-8";
 
   return (
