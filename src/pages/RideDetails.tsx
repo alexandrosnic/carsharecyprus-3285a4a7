@@ -230,6 +230,46 @@ const RideDetails = () => {
             </CardContent>
           </Card>
 
+          {/* Vehicle & Preferences */}
+          {(ride.vehicle_make || ride.smoking_allowed || ride.pets_allowed || (ride.luggage_size && ride.luggage_size !== 'medium')) && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Car className="h-5 w-5" />
+                  Vehicle & Preferences
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap gap-3">
+                  {ride.vehicle_make && (
+                    <Badge variant="outline" className="py-1 px-3">
+                      <Car className="h-3 w-3 mr-1" />
+                      {ride.vehicle_color} {ride.vehicle_make}
+                    </Badge>
+                  )}
+                  {ride.smoking_allowed && (
+                    <Badge variant="outline" className="py-1 px-3">
+                      <Cigarette className="h-3 w-3 mr-1" />
+                      Smoking OK
+                    </Badge>
+                  )}
+                  {ride.pets_allowed && (
+                    <Badge variant="outline" className="py-1 px-3">
+                      <PawPrint className="h-3 w-3 mr-1" />
+                      Pets OK
+                    </Badge>
+                  )}
+                  {ride.luggage_size && (
+                    <Badge variant="outline" className="py-1 px-3">
+                      <Briefcase className="h-3 w-3 mr-1" />
+                      {ride.luggage_size} luggage
+                    </Badge>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           <div className="grid md:grid-cols-3 gap-8">
             {/* Driver Information */}
             <div className="md:col-span-2">
