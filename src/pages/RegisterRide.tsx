@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
-import { ArrowLeft, Car, MapPin, Calendar, Users, DollarSign, Plus, Clock, Trash2, Repeat, RotateCcw } from 'lucide-react';
+import { ArrowLeft, Car, MapPin, Calendar, Users, Euro, Plus, Clock, Trash2, Repeat, RotateCcw } from 'lucide-react';
 import { toast } from 'sonner';
 import { getEstimatedDuration, formatDuration } from '@/constants/travelTimes';
 import LocationInput, { LocationResult } from '@/components/LocationInput';
