@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { ArrowLeft, MapPin, Clock, Users, Star, CheckCircle, XCircle, AlertCircle, Ban } from 'lucide-react';
+import { ArrowLeft, MapPin, Clock, Users, Star, CheckCircle, XCircle, AlertCircle, Ban, Pencil } from 'lucide-react';
 import { BRAND_LOGO } from '@/constants/brand';
 import { toast } from 'sonner';
 import { useNotifications } from '@/hooks/useNotifications';
@@ -467,7 +467,15 @@ const MyTrips = () => {
 
                         {/* Cancel buttons */}
                         {trip.type === 'driver' && trip.status === 'active' && (
-                          <div className="mt-4 pt-4 border-t">
+                          <div className="mt-4 pt-4 border-t flex gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => navigate(`/edit-ride/${trip.id}`)}
+                            >
+                              <Pencil className="h-4 w-4 mr-1" />
+                              Edit Ride
+                            </Button>
                             <Button
                               size="sm"
                               variant="destructive"
