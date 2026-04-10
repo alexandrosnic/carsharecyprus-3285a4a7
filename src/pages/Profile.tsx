@@ -8,6 +8,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { ArrowLeft, Camera, Star, User, Phone, Mail, Save, Shield, Loader2, MessageSquare } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
 import { ArrowLeft, Camera, Star, User, Phone, Mail, Save, Shield, Loader2 } from 'lucide-react';
 import { BRAND_LOGO } from '@/constants/brand';
 import { useNavigate } from 'react-router-dom';
@@ -20,6 +23,14 @@ interface ProfileData {
   avatar_url: string;
   rating: number;
   total_rides: number;
+}
+
+interface Review {
+  id: string;
+  rating: number;
+  comment: string | null;
+  created_at: string;
+  rater_name: string;
 }
 
 const Profile = () => {
