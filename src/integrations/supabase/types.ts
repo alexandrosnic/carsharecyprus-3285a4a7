@@ -239,6 +239,8 @@ export type Database = {
           id: string
           phone_number: string | null
           rating: number | null
+          stripe_account_id: string | null
+          stripe_onboarding_complete: boolean | null
           total_rides: number | null
           updated_at: string
           user_id: string
@@ -250,6 +252,8 @@ export type Database = {
           id?: string
           phone_number?: string | null
           rating?: number | null
+          stripe_account_id?: string | null
+          stripe_onboarding_complete?: boolean | null
           total_rides?: number | null
           updated_at?: string
           user_id: string
@@ -261,6 +265,8 @@ export type Database = {
           id?: string
           phone_number?: string | null
           rating?: number | null
+          stripe_account_id?: string | null
+          stripe_onboarding_complete?: boolean | null
           total_rides?: number | null
           updated_at?: string
           user_id?: string
