@@ -164,12 +164,11 @@ const Profile = () => {
       // Save immediately
       await supabase
         .from('profiles')
-        .upsert({
-          user_id: user.id,
+        .update({
           avatar_url: avatarUrl,
-          full_name: profileData.full_name,
           updated_at: new Date().toISOString(),
-        });
+        })
+        .eq('user_id', user.id);
 
       toast.success('Profile photo updated!');
     } catch (error: any) {
@@ -187,13 +186,13 @@ const Profile = () => {
     try {
       const { error } = await supabase
         .from('profiles')
-        .upsert({
-          user_id: user.id,
+        .update({
           full_name: profileData.full_name,
           phone_number: profileData.phone_number,
           avatar_url: profileData.avatar_url,
           updated_at: new Date().toISOString(),
-        });
+        })
+        .eq('user_id', user.id);
 
       if (error) throw error;
 
