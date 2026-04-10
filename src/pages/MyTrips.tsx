@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { ArrowLeft, MapPin, Clock, Users, Star, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import { ArrowLeft, MapPin, Clock, Users, Star, CheckCircle, XCircle, AlertCircle, Ban } from 'lucide-react';
 import { BRAND_LOGO } from '@/constants/brand';
 import { toast } from 'sonner';
 import { useNotifications } from '@/hooks/useNotifications';
