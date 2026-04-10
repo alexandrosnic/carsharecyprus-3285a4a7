@@ -498,7 +498,7 @@ const RegisterRide = () => {
               <div className="space-y-2">
                 <Label htmlFor="price">Price per Seat (€) *</Label>
                 <div className="relative">
-                  <DollarSign className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Euro className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input id="price" type="number" step="0.01" min="0" value={formData.price_per_seat} onChange={(e) => handleInputChange('price_per_seat', e.target.value)} className="pl-9" placeholder="15.00" required />
                 </div>
                 <p className="text-sm text-muted-foreground">This is the price passengers will pay per seat.</p>
