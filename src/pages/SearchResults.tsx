@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { ArrowLeft, Clock, MapPin, Star, Users, Car, Filter, Cigarette, PawPrint, Briefcase } from "lucide-react";
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { getEstimatedDuration, formatDuration } from '@/constants/travelTimes';
 
 interface Ride {
   id: string;
