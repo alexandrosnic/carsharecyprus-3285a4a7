@@ -120,6 +120,7 @@ const FindRide = () => {
                   placeholder="Type destination city..."
                 />
               </div>
+            </div>
 
             {/* Date and Time */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
