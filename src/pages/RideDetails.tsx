@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { ArrowLeft, MapPin, Clock, Users, Star, Phone, MessageCircle, Car, DollarSign } from 'lucide-react';
+import { ArrowLeft, MapPin, Clock, Users, Star, Phone, MessageCircle, Car, DollarSign, Cigarette, PawPrint, Briefcase } from 'lucide-react';
 import { toast } from 'sonner';
 import Map from '@/components/Map';
 
@@ -20,6 +20,11 @@ interface RideDetails {
   price_per_seat: number;
   description: string;
   status: string;
+  vehicle_make: string | null;
+  vehicle_color: string | null;
+  smoking_allowed: boolean | null;
+  pets_allowed: boolean | null;
+  luggage_size: string | null;
   driver_profile?: {
     user_id: string;
     full_name: string;
