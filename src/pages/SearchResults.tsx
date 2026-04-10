@@ -6,7 +6,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Clock, MapPin, Star, Users, Car, Filter, Cigarette, PawPrint, Briefcase } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import { ArrowLeft, Clock, MapPin, Star, Users, Car, Filter, Cigarette, PawPrint, Briefcase, ArrowRight, ChevronRight } from "lucide-react";
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { getEstimatedDuration, formatDuration } from '@/constants/travelTimes';
@@ -34,6 +35,8 @@ interface Ride {
     rating: number;
     total_rides: number;
   };
+  // computed
+  relevanceScore?: number;
 }
 
 const SearchResults = () => {
@@ -41,24 +44,63 @@ const SearchResults = () => {
   const [searchParams] = useSearchParams();
   const [rides, setRides] = useState<Ride[]>([]);
   const [loading, setLoading] = useState(true);
-  const [sortBy, setSortBy] = useState('departure_time');
-  const [filterBy, setFilterBy] = useState('all');
+  const [sortBy, setSortBy] = useState('relevance');
   
   // Advanced filters
   const [priceRange, setPriceRange] = useState({ min: 0, max: 100 });
-  const [timeRange, setTimeRange] = useState({ start: '', end: '' });
   const [minSeats, setMinSeats] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
 
-  // Get search parameters
   const departure = searchParams.get('departure') || '';
   const destination = searchParams.get('destination') || '';
   const date = searchParams.get('date') || '';
+  const time = searchParams.get('time') || '';
   const passengers = parseInt(searchParams.get('passengers') || '1');
 
   useEffect(() => {
     fetchRides();
-  }, [searchParams, sortBy, priceRange, timeRange, minSeats]);
+  }, [searchParams, sortBy, priceRange, minSeats]);
+
+  // Extract the core city name from a full address for fuzzy matching
+  const extractCity = (location: string): string => {
+    // Try to get the first meaningful part (before comma)
+    const parts = location.split(',').map(s => s.trim());
+    return parts[0].toLowerCase();
+  };
+
+  const computeRelevance = (ride: Ride): number => {
+    let score = 0;
+
+    // City match (fuzzy - check if search term is contained in ride city or vice versa)
+    const depSearch = extractCity(departure);
+    const destSearch = extractCity(destination);
+    const rideDep = ride.departure_city.toLowerCase();
+    const rideArr = ride.arrival_city.toLowerCase();
+
+    if (depSearch && (rideDep.includes(depSearch) || depSearch.includes(rideDep))) score += 40;
+    if (destSearch && (rideArr.includes(destSearch) || destSearch.includes(rideArr))) score += 40;
+
+    // Time proximity bonus (if search time specified)
+    if (time) {
+      const [searchHour] = time.split(':').map(Number);
+      const rideHour = new Date(ride.departure_time).getHours();
+      const hourDiff = Math.abs(rideHour - searchHour);
+      score += Math.max(0, 10 - hourDiff * 2); // Up to 10 points
+    }
+
+    // Driver rating bonus
+    const rating = ride.driver_profile?.rating || 5;
+    score += rating * 2; // Up to 10 points
+
+    // Experience bonus
+    const trips = ride.driver_profile?.total_rides || 0;
+    score += Math.min(trips, 10); // Up to 10 points
+
+    // Seat availability bonus
+    score += Math.min(ride.available_seats, 5);
+
+    return score;
+  };
 
   const fetchRides = async () => {
     try {
@@ -68,37 +110,23 @@ const SearchResults = () => {
         .select('*')
         .eq('status', 'active')
         .gte('available_seats', passengers)
-        .gte('departure_time', new Date().toISOString()); // Only future rides
+        .gte('departure_time', new Date().toISOString());
 
-      if (departure) {
-        query = query.eq('departure_city', departure);
-      }
-      if (destination) {
-        query = query.eq('arrival_city', destination);
-      }
       if (date) {
-        // Filter rides for the entire selected date
         const startOfDay = new Date(date + 'T00:00:00').toISOString();
         const endOfDay = new Date(date + 'T23:59:59').toISOString();
         query = query.gte('departure_time', startOfDay).lte('departure_time', endOfDay);
       }
 
-      // Apply sorting
-      if (sortBy === 'price_per_seat') {
-        query = query.order('price_per_seat', { ascending: true });
-      } else if (sortBy === 'driver_rating') {
-        query = query.order('departure_time', { ascending: true }); // Default sort, then we'll sort by rating in frontend
-      } else {
-        query = query.order('departure_time', { ascending: true });
-      }
+      // Don't filter by exact city match on DB — fetch broadly and rank client-side
+      query = query.order('departure_time', { ascending: true });
 
       const { data, error } = await query;
-
       if (error) throw error;
 
       let processedRides = data || [];
 
-      // Fetch driver profiles for each ride (using public view)
+      // Fetch driver profiles
       if (processedRides.length > 0) {
         const driverIds = [...new Set(processedRides.map(ride => ride.driver_id))];
         const { data: profiles } = await supabase
@@ -106,45 +134,38 @@ const SearchResults = () => {
           .select('user_id, full_name, avatar_url, rating, total_rides')
           .in('user_id', driverIds);
 
-        // Attach driver profiles to rides
         processedRides = processedRides.map(ride => ({
           ...ride,
           driver_profile: profiles?.find(p => p.user_id === ride.driver_id)
         }));
       }
 
-      // Apply advanced filters
-      const ridesWithProfiles = processedRides as Ride[];
-      const filteredRides = ridesWithProfiles.filter(ride => {
-        // Price filter
-        if (ride.price_per_seat < priceRange.min || ride.price_per_seat > priceRange.max) {
-          return false;
-        }
-        
-        // Time filter
-        if (timeRange.start && timeRange.end) {
-          const rideTime = new Date(ride.departure_time).getHours();
-          const startHour = parseInt(timeRange.start.split(':')[0]);
-          const endHour = parseInt(timeRange.end.split(':')[0]);
-          if (rideTime < startHour || rideTime > endHour) {
-            return false;
-          }
-        }
-        
-        // Minimum seats filter
-        if (ride.available_seats < minSeats) {
-          return false;
-        }
-        
-        return true;
-      });
+      // Apply filters & relevance scoring
+      let ridesWithScores = (processedRides as Ride[])
+        .filter(ride => {
+          if (ride.price_per_seat < priceRange.min || ride.price_per_seat > priceRange.max) return false;
+          if (ride.available_seats < minSeats) return false;
+          return true;
+        })
+        .map(ride => ({ ...ride, relevanceScore: computeRelevance(ride) }));
 
-      // Sort by rating if selected
-      if (sortBy === 'driver_rating') {
-        filteredRides.sort((a, b) => (b.driver_profile?.rating || 0) - (a.driver_profile?.rating || 0));
+      // Only show rides with some relevance if search terms exist
+      if (departure || destination) {
+        ridesWithScores = ridesWithScores.filter(r => (r.relevanceScore || 0) > 10);
       }
 
-      setRides(filteredRides);
+      // Sort
+      if (sortBy === 'relevance') {
+        ridesWithScores.sort((a, b) => (b.relevanceScore || 0) - (a.relevanceScore || 0));
+      } else if (sortBy === 'price_per_seat') {
+        ridesWithScores.sort((a, b) => a.price_per_seat - b.price_per_seat);
+      } else if (sortBy === 'departure_time') {
+        ridesWithScores.sort((a, b) => new Date(a.departure_time).getTime() - new Date(b.departure_time).getTime());
+      } else if (sortBy === 'driver_rating') {
+        ridesWithScores.sort((a, b) => (b.driver_profile?.rating || 0) - (a.driver_profile?.rating || 0));
+      }
+
+      setRides(ridesWithScores);
     } catch (error: any) {
       console.error('Error fetching rides:', error);
     } finally {
@@ -167,6 +188,13 @@ const SearchResults = () => {
     });
   };
 
+  const getArrivalTime = (departureTime: string, depCity: string, arrCity: string) => {
+    const duration = getEstimatedDuration(depCity, arrCity);
+    if (!duration) return null;
+    const arrival = new Date(new Date(departureTime).getTime() + duration * 60000);
+    return formatTime(arrival.toISOString());
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -179,229 +207,224 @@ const SearchResults = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background p-4">
-      <div className="max-w-6xl mx-auto">
-        <Button 
-          variant="ghost" 
-          onClick={() => navigate('/find-ride')}
-          className="mb-6"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Search
-        </Button>
-
-        <div className="space-y-4 mb-6">
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <div className="bg-card border-b border-border">
+        <div className="max-w-3xl mx-auto px-4 py-4">
+          <Button variant="ghost" onClick={() => navigate('/find-ride')} className="mb-3">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Search
+          </Button>
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold">Available Rides</h1>
-              <p className="text-muted-foreground">
-                {departure} → {destination} • {formatDate(date)} • {passengers} passenger{passengers !== 1 ? 's' : ''}
+              <h1 className="text-xl font-bold flex items-center gap-2">
+                {departure ? extractCity(departure).charAt(0).toUpperCase() + extractCity(departure).slice(1) : 'Any'}
+                <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                {destination ? extractCity(destination).charAt(0).toUpperCase() + extractCity(destination).slice(1) : 'Any'}
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                {date ? formatDate(date + 'T12:00:00') : 'Any date'} · {passengers} passenger{passengers !== 1 ? 's' : ''} · {rides.length} ride{rides.length !== 1 ? 's' : ''} found
               </p>
             </div>
-            
-            <div className="flex items-center gap-2">
-              <Button 
-                variant="outline" 
-                onClick={() => setShowFilters(!showFilters)}
-                className="gap-2"
-              >
-                <Filter className="h-4 w-4" />
-                Filters
-              </Button>
-              
-              <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-48">
-                  <SelectValue placeholder="Sort by" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="departure_time">Earliest Departure</SelectItem>
-                  <SelectItem value="price_per_seat">Lowest Price</SelectItem>
-                  <SelectItem value="driver_rating">Highest Rating</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
           </div>
+        </div>
+      </div>
 
-          {showFilters && (
-            <Card className="p-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <Label htmlFor="price-range" className="text-sm font-medium">Price Range (€)</Label>
-                  <div className="flex items-center gap-2 mt-2">
-                    <Input
-                      type="number"
-                      placeholder="Min"
-                      value={priceRange.min}
-                      onChange={(e) => setPriceRange(prev => ({ ...prev, min: parseInt(e.target.value) || 0 }))}
-                      className="w-20"
-                    />
-                    <span>-</span>
-                    <Input
-                      type="number"
-                      placeholder="Max"
-                      value={priceRange.max}
-                      onChange={(e) => setPriceRange(prev => ({ ...prev, max: parseInt(e.target.value) || 100 }))}
-                      className="w-20"
-                    />
-                  </div>
-                </div>
-                
-                <div>
-                  <Label htmlFor="time-range" className="text-sm font-medium">Departure Time</Label>
-                  <div className="flex items-center gap-2 mt-2">
-                    <Input
-                      type="time"
-                      value={timeRange.start}
-                      onChange={(e) => setTimeRange(prev => ({ ...prev, start: e.target.value }))}
-                    />
-                    <span>-</span>
-                    <Input
-                      type="time"
-                      value={timeRange.end}
-                      onChange={(e) => setTimeRange(prev => ({ ...prev, end: e.target.value }))}
-                    />
-                  </div>
-                </div>
-                
-                <div>
-                  <Label htmlFor="min-seats" className="text-sm font-medium">Minimum Seats</Label>
+      <div className="max-w-3xl mx-auto px-4 py-4">
+        {/* Sort & Filters bar */}
+        <div className="flex items-center justify-between mb-4">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => setShowFilters(!showFilters)}
+            className="gap-2"
+          >
+            <Filter className="h-4 w-4" />
+            Filters
+          </Button>
+          
+          <Select value={sortBy} onValueChange={setSortBy}>
+            <SelectTrigger className="w-44 h-9">
+              <SelectValue placeholder="Sort by" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="relevance">Most relevant</SelectItem>
+              <SelectItem value="departure_time">Earliest departure</SelectItem>
+              <SelectItem value="price_per_seat">Lowest price</SelectItem>
+              <SelectItem value="driver_rating">Highest rating</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {showFilters && (
+          <Card className="p-4 mb-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <Label className="text-sm font-medium">Price Range (€)</Label>
+                <div className="flex items-center gap-2 mt-2">
                   <Input
                     type="number"
-                    min="1"
-                    max="8"
-                    value={minSeats}
-                    onChange={(e) => setMinSeats(parseInt(e.target.value) || 1)}
-                    className="mt-2"
+                    placeholder="Min"
+                    value={priceRange.min}
+                    onChange={(e) => setPriceRange(prev => ({ ...prev, min: parseInt(e.target.value) || 0 }))}
+                    className="w-20"
+                  />
+                  <span>-</span>
+                  <Input
+                    type="number"
+                    placeholder="Max"
+                    value={priceRange.max}
+                    onChange={(e) => setPriceRange(prev => ({ ...prev, max: parseInt(e.target.value) || 100 }))}
+                    className="w-20"
                   />
                 </div>
               </div>
-              
-              <div className="flex justify-end gap-2 mt-4">
+              <div>
+                <Label className="text-sm font-medium">Minimum Seats</Label>
+                <Input
+                  type="number"
+                  min="1"
+                  max="8"
+                  value={minSeats}
+                  onChange={(e) => setMinSeats(parseInt(e.target.value) || 1)}
+                  className="mt-2"
+                />
+              </div>
+              <div className="flex items-end">
                 <Button 
                   variant="outline" 
-                  onClick={() => {
-                    setPriceRange({ min: 0, max: 100 });
-                    setTimeRange({ start: '', end: '' });
-                    setMinSeats(1);
-                  }}
+                  size="sm"
+                  onClick={() => { setPriceRange({ min: 0, max: 100 }); setMinSeats(1); }}
                 >
                   Clear Filters
                 </Button>
               </div>
-            </Card>
-          )}
-        </div>
+            </div>
+          </Card>
+        )}
 
+        {/* Results */}
         {rides.length === 0 ? (
           <Card className="text-center py-16">
             <CardContent>
               <Car className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-50" />
               <h3 className="text-xl font-semibold mb-2">No rides found</h3>
               <p className="text-muted-foreground mb-2">
-                No rides match your search for {departure} → {destination}
+                No rides match your search{departure && destination ? ` for ${extractCity(departure)} → ${extractCity(destination)}` : ''}
                 {date && ` on ${formatDate(date + 'T12:00:00')}`}
               </p>
               <p className="text-sm text-muted-foreground mb-6">
                 Try a different date, fewer passengers, or create your own ride
               </p>
               <div className="flex gap-4 justify-center">
-                <Button onClick={() => navigate('/find-ride')}>
-                  Modify Search
-                </Button>
-                <Button variant="outline" onClick={() => navigate('/register-ride')}>
-                  Offer This Ride
-                </Button>
+                <Button onClick={() => navigate('/find-ride')}>Modify Search</Button>
+                <Button variant="outline" onClick={() => navigate('/register-ride')}>Offer This Ride</Button>
               </div>
             </CardContent>
           </Card>
         ) : (
-          <div className="space-y-4">
-            {rides.map((ride) => (
-              <Card 
-                key={ride.id} 
-                className="hover:shadow-lg transition-shadow cursor-pointer"
-                onClick={() => navigate(`/ride/${ride.id}`)}
-              >
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-4 mb-2">
-                        <div className="flex items-center space-x-2">
-                          <MapPin className="h-4 w-4 text-muted-foreground" />
-                          <span className="font-medium">{ride.departure_city}</span>
-                          <span className="text-muted-foreground">→</span>
-                          <span className="font-medium">{ride.arrival_city}</span>
+          <div className="space-y-3">
+            {rides.map((ride) => {
+              const duration = getEstimatedDuration(ride.departure_city, ride.arrival_city);
+              const arrivalTime = getArrivalTime(ride.departure_time, ride.departure_city, ride.arrival_city);
+
+              return (
+                <Card 
+                  key={ride.id} 
+                  className="hover:shadow-md transition-shadow cursor-pointer border"
+                  onClick={() => navigate(`/ride/${ride.id}`)}
+                >
+                  <CardContent className="p-4 md:p-5">
+                    {/* BlaBlaCar-style layout */}
+                    <div className="flex items-start justify-between gap-4">
+                      {/* Left: Time & Route */}
+                      <div className="flex-1 min-w-0">
+                        {/* Timeline row */}
+                        <div className="flex items-center gap-3 mb-3">
+                          <div className="text-right w-12 flex-shrink-0">
+                            <div className="text-lg font-bold">{formatTime(ride.departure_time)}</div>
+                          </div>
+                          <div className="flex flex-col items-center">
+                            <div className="w-2.5 h-2.5 rounded-full bg-primary" />
+                            <div className="w-0.5 h-8 bg-border" />
+                            <div className="w-2.5 h-2.5 rounded-full border-2 border-primary bg-background" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="font-medium truncate">{ride.departure_city}</div>
+                            {duration && (
+                              <div className="text-xs text-muted-foreground my-1">{formatDuration(duration)}</div>
+                            )}
+                            <div className="font-medium truncate">{ride.arrival_city}</div>
+                          </div>
                         </div>
-                        {(() => {
-                          const duration = getEstimatedDuration(ride.departure_city, ride.arrival_city);
-                          return duration ? (
+                        {arrivalTime && (
+                          <div className="flex items-center gap-3 mb-2">
+                            <div className="text-right w-12 flex-shrink-0">
+                              <div className="text-sm text-muted-foreground">{arrivalTime}</div>
+                            </div>
+                            <div className="flex-1" />
+                          </div>
+                        )}
+
+                        {/* Date */}
+                        <div className="text-sm text-muted-foreground mb-2">
+                          {formatDate(ride.departure_time)}
+                        </div>
+
+                        {/* Tags */}
+                        <div className="flex flex-wrap gap-1.5">
+                          <Badge variant="secondary" className="text-xs py-0">
+                            <Users className="h-3 w-3 mr-1" />{ride.available_seats} seat{ride.available_seats > 1 ? 's' : ''}
+                          </Badge>
+                          {ride.vehicle_make && (
                             <Badge variant="outline" className="text-xs py-0">
-                              <Clock className="h-3 w-3 mr-1" />{formatDuration(duration)}
+                              <Car className="h-3 w-3 mr-1" />{ride.vehicle_color} {ride.vehicle_make}
                             </Badge>
-                          ) : null;
-                        })()}
-                      </div>
-                      
-                      <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-                        <div className="flex items-center space-x-1">
-                          <Clock className="h-4 w-4" />
-                          <span>{formatTime(ride.departure_time)}</span>
-                          <span>•</span>
-                          <span>{formatDate(ride.departure_time)}</span>
+                          )}
+                          {ride.smoking_allowed && (
+                            <Badge variant="outline" className="text-xs py-0"><Cigarette className="h-3 w-3 mr-1" />Smoking</Badge>
+                          )}
+                          {ride.pets_allowed && (
+                            <Badge variant="outline" className="text-xs py-0"><PawPrint className="h-3 w-3 mr-1" />Pets</Badge>
+                          )}
+                          {ride.luggage_size && ride.luggage_size !== 'medium' && (
+                            <Badge variant="outline" className="text-xs py-0"><Briefcase className="h-3 w-3 mr-1" />{ride.luggage_size}</Badge>
+                          )}
                         </div>
-                        <div className="flex items-center space-x-1">
-                          <Users className="h-4 w-4" />
-                          <span>{ride.available_seats} seat{ride.available_seats > 1 ? 's' : ''} available</span>
-                        </div>
-                        {ride.vehicle_make && (
-                          <span className="text-xs text-muted-foreground">
-                            {ride.vehicle_color} {ride.vehicle_make}
-                          </span>
-                        )}
                       </div>
-                      {/* Ride preferences */}
-                      <div className="flex gap-1 mt-1">
-                        {ride.smoking_allowed && (
-                          <Badge variant="outline" className="text-xs py-0"><Cigarette className="h-3 w-3 mr-1" />Smoking OK</Badge>
-                        )}
-                        {ride.pets_allowed && (
-                          <Badge variant="outline" className="text-xs py-0"><PawPrint className="h-3 w-3 mr-1" />Pets OK</Badge>
-                        )}
-                        {ride.luggage_size && ride.luggage_size !== 'medium' && (
-                          <Badge variant="outline" className="text-xs py-0"><Briefcase className="h-3 w-3 mr-1" />{ride.luggage_size} luggage</Badge>
-                        )}
-                      </div>
-                    </div>
 
-                    <div className="flex items-center space-x-4">
-                      <div className="text-right">
-                        <div className="font-medium">{ride.driver_profile?.full_name || 'Unknown Driver'}</div>
-                        <div className="flex items-center space-x-1 text-sm">
-                          <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                          <span>{ride.driver_profile?.rating?.toFixed(1) || '5.0'}</span>
-                          <span className="text-muted-foreground">
-                            • {ride.driver_profile?.total_rides || 0} trips
-                          </span>
+                      {/* Right: Price & Driver */}
+                      <div className="flex flex-col items-end justify-between gap-3 flex-shrink-0">
+                        <div className="text-2xl font-bold text-primary">
+                          €{ride.price_per_seat.toFixed(2)}
                         </div>
-                      </div>
-                      <Avatar>
-                        <AvatarImage src={ride.driver_profile?.avatar_url} />
-                        <AvatarFallback>
-                          {ride.driver_profile?.full_name?.split(' ').map(n => n[0]).join('') || 'D'}
-                        </AvatarFallback>
-                      </Avatar>
-                    </div>
 
-                    <div className="text-right ml-6">
-                      <div className="text-2xl font-bold text-primary">
-                        €{ride.price_per_seat}
+                        <div className="flex items-center gap-2">
+                          <div className="text-right">
+                            <div className="text-sm font-medium truncate max-w-[120px]">
+                              {ride.driver_profile?.full_name || 'Driver'}
+                            </div>
+                            <div className="flex items-center justify-end gap-1 text-xs text-muted-foreground">
+                              <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                              <span>{ride.driver_profile?.rating?.toFixed(1) || '5.0'}</span>
+                              <span>· {ride.driver_profile?.total_rides || 0} trips</span>
+                            </div>
+                          </div>
+                          <Avatar className="h-10 w-10">
+                            <AvatarImage src={ride.driver_profile?.avatar_url} />
+                            <AvatarFallback className="text-sm">
+                              {ride.driver_profile?.full_name?.split(' ').map(n => n[0]).join('') || 'D'}
+                            </AvatarFallback>
+                          </Avatar>
+                        </div>
+
+                        <ChevronRight className="h-5 w-5 text-muted-foreground" />
                       </div>
-                      <div className="text-sm text-muted-foreground">per person</div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         )}
 
