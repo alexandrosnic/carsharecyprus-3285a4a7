@@ -501,7 +501,24 @@ const RegisterRide = () => {
                   <DollarSign className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input id="price" type="number" step="0.01" min="0" value={formData.price_per_seat} onChange={(e) => handleInputChange('price_per_seat', e.target.value)} className="pl-9" placeholder="15.00" required />
                 </div>
-                <p className="text-sm text-muted-foreground">Set a fair price considering fuel, tolls, and your time</p>
+                <p className="text-sm text-muted-foreground">This is the price passengers will pay per seat.</p>
+                {formData.price_per_seat && parseFloat(formData.price_per_seat) > 0 && (
+                  <div className="p-3 bg-accent/50 rounded-lg space-y-1">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Passenger pays:</span>
+                      <span className="font-medium">€{parseFloat(formData.price_per_seat).toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Platform fee (10%):</span>
+                      <span className="font-medium text-destructive">−€{(parseFloat(formData.price_per_seat) * 0.10).toFixed(2)}</span>
+                    </div>
+                    <Separator className="my-1" />
+                    <div className="flex justify-between text-sm font-semibold">
+                      <span>You'll earn:</span>
+                      <span className="text-primary">€{(parseFloat(formData.price_per_seat) * 0.90).toFixed(2)}</span>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-2">

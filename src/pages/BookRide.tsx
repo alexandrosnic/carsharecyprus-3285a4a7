@@ -353,21 +353,25 @@ const BookRide = () => {
                     <span>Number of seats:</span>
                     <span>{seatsToBook}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span>Subtotal:</span>
-                    <span>€{calculateTotal().toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between text-sm text-muted-foreground">
-                    <span>Service fee:</span>
-                    <span>€0.00</span>
-                  </div>
                 </div>
                 
                 <Separator />
-                
+
                 <div className="flex justify-between text-lg font-semibold">
                   <span>Total:</span>
                   <span className="text-primary">€{calculateTotal().toFixed(2)}</span>
+                </div>
+
+                <div className="p-3 bg-accent/50 rounded-lg text-xs text-muted-foreground space-y-1">
+                  <p className="font-medium text-foreground text-sm">Fee breakdown</p>
+                  <div className="flex justify-between">
+                    <span>Driver receives (90%):</span>
+                    <span>€{(calculateTotal() * 0.90).toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Service fee (10%):</span>
+                    <span>€{(calculateTotal() * 0.10).toFixed(2)}</span>
+                  </div>
                 </div>
                 
                 <Separator />
