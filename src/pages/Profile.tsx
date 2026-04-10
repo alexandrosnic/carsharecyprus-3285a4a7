@@ -54,12 +54,19 @@ const Profile = () => {
       fetchProfile();
       fetchReviews();
     }
-    // Handle Stripe Connect return
     const params = new URLSearchParams(window.location.search);
+    // Handle Stripe Connect return
     if (params.get('stripe') === 'complete') {
       toast.success('Stripe setup complete! Checking status...');
-      // Clean URL
       window.history.replaceState({}, '', '/profile');
+    }
+    // Auto-trigger Stripe Connect setup from ride creation prompt
+    if (params.get('setup_payouts') === 'true') {
+      window.history.replaceState({}, '', '/profile');
+      // Small delay to let profile load first
+      setTimeout(() => {
+        document.getElementById('setup-payouts-btn')?.click();
+      }, 1000);
     }
   }, [user]);
 
