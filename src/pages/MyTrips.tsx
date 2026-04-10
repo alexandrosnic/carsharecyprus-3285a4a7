@@ -467,7 +467,15 @@ const MyTrips = () => {
 
                         {/* Cancel buttons */}
                         {trip.type === 'driver' && trip.status === 'active' && (
-                          <div className="mt-4 pt-4 border-t">
+                          <div className="mt-4 pt-4 border-t flex gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => navigate(`/edit-ride/${trip.id}`)}
+                            >
+                              <Pencil className="h-4 w-4 mr-1" />
+                              Edit Ride
+                            </Button>
                             <Button
                               size="sm"
                               variant="destructive"
