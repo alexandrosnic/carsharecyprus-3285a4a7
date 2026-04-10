@@ -16,6 +16,8 @@ export type Database = {
     Tables: {
       bookings: {
         Row: {
+          cancellation_reason: string | null
+          cancelled_at: string | null
           commission_amount: number
           created_at: string
           driver_amount: number
@@ -29,6 +31,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
           commission_amount: number
           created_at?: string
           driver_amount: number
@@ -42,6 +46,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
           commission_amount?: number
           created_at?: string
           driver_amount?: number
@@ -334,9 +340,14 @@ export type Database = {
           description: string | null
           driver_id: string
           id: string
+          luggage_size: string | null
+          pets_allowed: boolean | null
           price_per_seat: number
+          smoking_allowed: boolean | null
           status: string | null
           updated_at: string
+          vehicle_color: string | null
+          vehicle_make: string | null
         }
         Insert: {
           arrival_city: string
@@ -347,9 +358,14 @@ export type Database = {
           description?: string | null
           driver_id: string
           id?: string
+          luggage_size?: string | null
+          pets_allowed?: boolean | null
           price_per_seat: number
+          smoking_allowed?: boolean | null
           status?: string | null
           updated_at?: string
+          vehicle_color?: string | null
+          vehicle_make?: string | null
         }
         Update: {
           arrival_city?: string
@@ -360,9 +376,14 @@ export type Database = {
           description?: string | null
           driver_id?: string
           id?: string
+          luggage_size?: string | null
+          pets_allowed?: boolean | null
           price_per_seat?: number
+          smoking_allowed?: boolean | null
           status?: string | null
           updated_at?: string
+          vehicle_color?: string | null
+          vehicle_make?: string | null
         }
         Relationships: []
       }
