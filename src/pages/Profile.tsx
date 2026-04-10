@@ -54,6 +54,13 @@ const Profile = () => {
       fetchProfile();
       fetchReviews();
     }
+    // Handle Stripe Connect return
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('stripe') === 'complete') {
+      toast.success('Stripe setup complete! Checking status...');
+      // Clean URL
+      window.history.replaceState({}, '', '/profile');
+    }
   }, [user]);
 
   const fetchReviews = async () => {
