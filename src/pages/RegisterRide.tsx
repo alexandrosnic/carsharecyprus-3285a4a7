@@ -10,10 +10,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
-import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Car, MapPin, Calendar, Users, DollarSign, Map, Plus, Clock, Trash2, Repeat } from 'lucide-react';
+import { ArrowLeft, Car, MapPin, Calendar, Users, DollarSign, Plus, Clock, Trash2, Repeat, RotateCcw } from 'lucide-react';
 import { toast } from 'sonner';
 import { getEstimatedDuration, formatDuration } from '@/constants/travelTimes';
+import LocationInput from '@/components/LocationInput';
 
 interface RideFormData {
   departure_city: string;
@@ -26,11 +26,13 @@ interface RideFormData {
   smoking_allowed: boolean;
   pets_allowed: boolean;
   return_ride: boolean;
+  return_time: string;
   vehicle_make: string;
   vehicle_color: string;
   is_recurring: boolean;
   recurrence_pattern: string;
   recurrence_end_date: string;
+  custom_days: number[]; // 0=Sun, 1=Mon, ..., 6=Sat
 }
 
 interface StopData {
@@ -38,10 +40,7 @@ interface StopData {
   price_from_start: string;
 }
 
-const cities = [
-  'Nicosia', 'Limassol', 'Larnaca', 'Paphos', 'Famagusta', 'Kyrenia',
-  'Protaras', 'Ayia Napa', 'Troodos', 'Polis', 'Paralimni'
-];
+const dayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 const RegisterRide = () => {
   const navigate = useNavigate();
@@ -59,25 +58,30 @@ const RegisterRide = () => {
     smoking_allowed: false,
     pets_allowed: false,
     return_ride: false,
+    return_time: '',
     vehicle_make: '',
     vehicle_color: '',
     is_recurring: false,
     recurrence_pattern: '',
     recurrence_end_date: '',
+    custom_days: [],
   });
 
-  const handleInputChange = (field: keyof RideFormData, value: string | number | boolean) => {
+  const handleInputChange = (field: keyof RideFormData, value: string | number | boolean | number[]) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const toggleCustomDay = (day: number) => {
     setFormData(prev => ({
       ...prev,
-      [field]: value
+      custom_days: prev.custom_days.includes(day)
+        ? prev.custom_days.filter(d => d !== day)
+        : [...prev.custom_days, day].sort(),
     }));
   };
 
   const addStop = () => {
-    if (stops.length >= 5) {
-      toast.error('Maximum 5 intermediate stops');
-      return;
-    }
+    if (stops.length >= 5) { toast.error('Maximum 5 intermediate stops'); return; }
     setStops(prev => [...prev, { city: '', price_from_start: '' }]);
   };
 
@@ -93,49 +97,48 @@ const RegisterRide = () => {
     ? getEstimatedDuration(formData.departure_city, formData.arrival_city)
     : null;
 
+  const buildRidePayload = (overrides: Partial<{
+    departure_city: string; arrival_city: string; departure_time: string;
+  }> = {}) => ({
+    driver_id: user!.id,
+    departure_city: overrides.departure_city ?? formData.departure_city,
+    arrival_city: overrides.arrival_city ?? formData.arrival_city,
+    departure_time: overrides.departure_time ?? formData.departure_time,
+    available_seats: formData.available_seats,
+    price_per_seat: parseFloat(formData.price_per_seat),
+    description: formData.description,
+    status: 'active' as const,
+    vehicle_make: formData.vehicle_make || null,
+    vehicle_color: formData.vehicle_color || null,
+    smoking_allowed: formData.smoking_allowed,
+    pets_allowed: formData.pets_allowed,
+    luggage_size: formData.luggage_size || 'medium',
+    is_recurring: false,
+    recurrence_pattern: null as string | null,
+  });
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) {
-      toast.error('You must be logged in to create a ride');
-      return;
-    }
-
-    if (!formData.departure_city || !formData.arrival_city) {
-      toast.error('Please select departure and destination cities');
-      return;
-    }
-
-    if (!formData.departure_time) {
-      toast.error('Please select departure date and time');
-      return;
-    }
-
-    if (!formData.price_per_seat || parseFloat(formData.price_per_seat) <= 0) {
-      toast.error('Please enter a valid price per seat');
-      return;
+    if (!user) { toast.error('You must be logged in to create a ride'); return; }
+    if (!formData.departure_city || !formData.arrival_city) { toast.error('Please select departure and destination'); return; }
+    if (!formData.departure_time) { toast.error('Please select departure date and time'); return; }
+    if (!formData.price_per_seat || parseFloat(formData.price_per_seat) <= 0) { toast.error('Please enter a valid price per seat'); return; }
+    if (formData.return_ride && !formData.return_time) { toast.error('Please select a return time'); return; }
+    if (formData.is_recurring && formData.recurrence_pattern === 'custom' && formData.custom_days.length === 0) {
+      toast.error('Please select at least one day for custom recurrence'); return;
     }
 
     setLoading(true);
     try {
-      // Create the ride
+      // Create main ride
+      const mainPayload = buildRidePayload();
+      mainPayload.is_recurring = formData.is_recurring;
+      mainPayload.recurrence_pattern = formData.is_recurring ? formData.recurrence_pattern : null;
+
       const { data: rideData, error } = await supabase
         .from('rides')
         .insert({
-          driver_id: user.id,
-          departure_city: formData.departure_city,
-          arrival_city: formData.arrival_city,
-          departure_time: formData.departure_time,
-          available_seats: formData.available_seats,
-          price_per_seat: parseFloat(formData.price_per_seat),
-          description: formData.description,
-          status: 'active',
-          vehicle_make: formData.vehicle_make || null,
-          vehicle_color: formData.vehicle_color || null,
-          smoking_allowed: formData.smoking_allowed,
-          pets_allowed: formData.pets_allowed,
-          luggage_size: formData.luggage_size || 'medium',
-          is_recurring: formData.is_recurring,
-          recurrence_pattern: formData.is_recurring ? formData.recurrence_pattern : null,
+          ...mainPayload,
           recurrence_end_date: formData.is_recurring && formData.recurrence_end_date ? formData.recurrence_end_date : null,
         })
         .select('id')
@@ -147,27 +150,26 @@ const RegisterRide = () => {
       if (stops.length > 0 && rideData) {
         const validStops = stops.filter(s => s.city);
         if (validStops.length > 0) {
-          const { error: stopsError } = await supabase
-            .from('ride_stops')
-            .insert(
-              validStops.map((stop, index) => ({
-                ride_id: rideData.id,
-                city: stop.city,
-                stop_order: index + 1,
-                price_from_start: stop.price_from_start ? parseFloat(stop.price_from_start) : null,
-              }))
-            );
-
-          if (stopsError) {
-            console.error('Error creating stops:', stopsError);
-            toast.error('Ride created but failed to add stops');
-          }
+          const { error: stopsError } = await supabase.from('ride_stops').insert(
+            validStops.map((stop, index) => ({
+              ride_id: rideData.id,
+              city: stop.city,
+              stop_order: index + 1,
+              price_from_start: stop.price_from_start ? parseFloat(stop.price_from_start) : null,
+            }))
+          );
+          if (stopsError) { console.error('Error creating stops:', stopsError); toast.error('Ride created but failed to add stops'); }
         }
       }
 
-      // If recurring, create future rides
+      // Create recurring rides
       if (formData.is_recurring && formData.recurrence_pattern && formData.recurrence_end_date) {
-        await createRecurringRides(rideData.id);
+        await createRecurringRides();
+      }
+
+      // Create return ride
+      if (formData.return_ride && formData.return_time) {
+        await createReturnRide();
       }
 
       toast.success('Ride created successfully!');
@@ -180,7 +182,35 @@ const RegisterRide = () => {
     }
   };
 
-  const createRecurringRides = async (originalRideId: string) => {
+  const createReturnRide = async () => {
+    if (!user) return;
+    // Build return time: same date as departure but with return_time
+    const departureDate = new Date(formData.departure_time);
+    const [hours, minutes] = formData.return_time.split(':').map(Number);
+    const returnDate = new Date(departureDate);
+    returnDate.setHours(hours, minutes, 0, 0);
+
+    // If return time is before departure, assume next day
+    if (returnDate <= departureDate) {
+      returnDate.setDate(returnDate.getDate() + 1);
+    }
+
+    const returnPayload = buildRidePayload({
+      departure_city: formData.arrival_city,
+      arrival_city: formData.departure_city,
+      departure_time: returnDate.toISOString(),
+    });
+
+    const { error } = await supabase.from('rides').insert(returnPayload);
+    if (error) {
+      console.error('Error creating return ride:', error);
+      toast.error('Main ride created but failed to create return ride');
+    } else {
+      toast.success('Return ride also created!');
+    }
+  };
+
+  const createRecurringRides = async () => {
     if (!user) return;
 
     const baseDate = new Date(formData.departure_time);
@@ -196,12 +226,19 @@ const RegisterRide = () => {
           break;
         case 'weekdays':
           next.setDate(next.getDate() + 1);
-          while (next.getDay() === 0 || next.getDay() === 6) {
-            next.setDate(next.getDate() + 1);
-          }
+          while (next.getDay() === 0 || next.getDay() === 6) next.setDate(next.getDate() + 1);
           break;
         case 'weekly':
           next.setDate(next.getDate() + 7);
+          break;
+        case 'custom':
+          // Advance day-by-day until we hit one of the selected days
+          next.setDate(next.getDate() + 1);
+          let guard = 0;
+          while (!formData.custom_days.includes(next.getDay()) && guard < 8) {
+            next.setDate(next.getDate() + 1);
+            guard++;
+          }
           break;
       }
       return next;
@@ -209,24 +246,11 @@ const RegisterRide = () => {
 
     currentDate = getNextDate(currentDate);
 
-    while (currentDate <= endDate && rides.length < 30) { // Max 30 recurring rides
-      rides.push({
-        driver_id: user.id,
-        departure_city: formData.departure_city,
-        arrival_city: formData.arrival_city,
-        departure_time: currentDate.toISOString(),
-        available_seats: formData.available_seats,
-        price_per_seat: parseFloat(formData.price_per_seat),
-        description: formData.description,
-        status: 'active',
-        vehicle_make: formData.vehicle_make || null,
-        vehicle_color: formData.vehicle_color || null,
-        smoking_allowed: formData.smoking_allowed,
-        pets_allowed: formData.pets_allowed,
-        luggage_size: formData.luggage_size || 'medium',
-        is_recurring: true,
-        recurrence_pattern: formData.recurrence_pattern,
-      });
+    while (currentDate <= endDate && rides.length < 30) {
+      const payload = buildRidePayload({ departure_time: currentDate.toISOString() });
+      payload.is_recurring = true;
+      payload.recurrence_pattern = formData.recurrence_pattern;
+      rides.push(payload);
       currentDate = getNextDate(currentDate);
     }
 
@@ -237,6 +261,24 @@ const RegisterRide = () => {
         toast.error('Failed to create some recurring rides');
       } else {
         toast.success(`Created ${rides.length} additional recurring rides`);
+      }
+
+      // If return ride is also enabled, create return rides for each recurring
+      if (formData.return_ride && formData.return_time) {
+        const returnRides = rides.map(r => {
+          const depDate = new Date(r.departure_time);
+          const [h, m] = formData.return_time.split(':').map(Number);
+          const retDate = new Date(depDate);
+          retDate.setHours(h, m, 0, 0);
+          if (retDate <= depDate) retDate.setDate(retDate.getDate() + 1);
+          return buildRidePayload({
+            departure_city: formData.arrival_city,
+            arrival_city: formData.departure_city,
+            departure_time: retDate.toISOString(),
+          });
+        });
+        const { error: retErr } = await supabase.from('rides').insert(returnRides);
+        if (retErr) console.error('Error creating recurring return rides:', retErr);
       }
     }
   };
@@ -274,22 +316,20 @@ const RegisterRide = () => {
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="departure">From *</Label>
-                  <Select value={formData.departure_city} onValueChange={(value) => handleInputChange('departure_city', value)}>
-                    <SelectTrigger><SelectValue placeholder="Select departure city" /></SelectTrigger>
-                    <SelectContent>
-                      {cities.map(city => <SelectItem key={city} value={city}>{city}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
+                  <Label>From *</Label>
+                  <LocationInput
+                    value={formData.departure_city}
+                    onChange={(val) => handleInputChange('departure_city', val)}
+                    placeholder="Type city or address..."
+                  />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="destination">To *</Label>
-                  <Select value={formData.arrival_city} onValueChange={(value) => handleInputChange('arrival_city', value)}>
-                    <SelectTrigger><SelectValue placeholder="Select destination city" /></SelectTrigger>
-                    <SelectContent>
-                      {cities.map(city => <SelectItem key={city} value={city}>{city}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
+                  <Label>To *</Label>
+                  <LocationInput
+                    value={formData.arrival_city}
+                    onChange={(val) => handleInputChange('arrival_city', val)}
+                    placeholder="Type destination or address..."
+                  />
                 </div>
               </div>
 
@@ -316,17 +356,14 @@ const RegisterRide = () => {
                 {stops.length > 0 && (
                   <div className="space-y-3">
                     {stops.map((stop, index) => (
-                      <div key={index} className="flex items-end gap-3 p-3 border rounded-lg">
+                      <div key={index} className="flex items-end gap-3 p-3 border border-border rounded-lg">
                         <div className="flex-1 space-y-1">
                           <Label className="text-xs">Stop {index + 1}</Label>
-                          <Select value={stop.city} onValueChange={(value) => updateStop(index, 'city', value)}>
-                            <SelectTrigger><SelectValue placeholder="Select city" /></SelectTrigger>
-                            <SelectContent>
-                              {cities
-                                .filter(c => c !== formData.departure_city && c !== formData.arrival_city)
-                                .map(city => <SelectItem key={city} value={city}>{city}</SelectItem>)}
-                            </SelectContent>
-                          </Select>
+                          <LocationInput
+                            value={stop.city}
+                            onChange={(val) => updateStop(index, 'city', val)}
+                            placeholder="Type stop city..."
+                          />
                         </div>
                         <div className="w-28 space-y-1">
                           <Label className="text-xs">Price (€)</Label>
@@ -420,28 +457,58 @@ const RegisterRide = () => {
                 </div>
 
                 {formData.is_recurring && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-6 border-l-2 border-primary/20">
-                    <div className="space-y-2">
-                      <Label>Frequency</Label>
-                      <Select value={formData.recurrence_pattern} onValueChange={(value) => handleInputChange('recurrence_pattern', value)}>
-                        <SelectTrigger><SelectValue placeholder="Select frequency" /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="daily">Every day</SelectItem>
-                          <SelectItem value="weekdays">Weekdays only (Mon-Fri)</SelectItem>
-                          <SelectItem value="weekly">Once a week</SelectItem>
-                        </SelectContent>
-                      </Select>
+                  <div className="space-y-4 pl-6 border-l-2 border-primary/20">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>Frequency</Label>
+                        <Select value={formData.recurrence_pattern} onValueChange={(value) => handleInputChange('recurrence_pattern', value)}>
+                          <SelectTrigger><SelectValue placeholder="Select frequency" /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="daily">Every day</SelectItem>
+                            <SelectItem value="weekdays">Weekdays only (Mon-Fri)</SelectItem>
+                            <SelectItem value="weekly">Once a week</SelectItem>
+                            <SelectItem value="custom">Custom days</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Until</Label>
+                        <Input
+                          type="date"
+                          value={formData.recurrence_end_date}
+                          onChange={(e) => handleInputChange('recurrence_end_date', e.target.value)}
+                          min={new Date().toISOString().split('T')[0]}
+                        />
+                      </div>
                     </div>
-                    <div className="space-y-2">
-                      <Label>Until</Label>
-                      <Input
-                        type="date"
-                        value={formData.recurrence_end_date}
-                        onChange={(e) => handleInputChange('recurrence_end_date', e.target.value)}
-                        min={new Date().toISOString().split('T')[0]}
-                      />
-                    </div>
-                    <p className="text-xs text-muted-foreground col-span-full">
+
+                    {/* Custom days picker */}
+                    {formData.recurrence_pattern === 'custom' && (
+                      <div className="space-y-2">
+                        <Label>Select days</Label>
+                        <div className="flex flex-wrap gap-2">
+                          {dayLabels.map((label, idx) => (
+                            <Button
+                              key={idx}
+                              type="button"
+                              variant={formData.custom_days.includes(idx) ? 'default' : 'outline'}
+                              size="sm"
+                              className="w-12"
+                              onClick={() => toggleCustomDay(idx)}
+                            >
+                              {label}
+                            </Button>
+                          ))}
+                        </div>
+                        {formData.custom_days.length > 0 && (
+                          <p className="text-xs text-muted-foreground">
+                            Rides will repeat every {formData.custom_days.map(d => dayLabels[d]).join(', ')}
+                          </p>
+                        )}
+                      </div>
+                    )}
+
+                    <p className="text-xs text-muted-foreground">
                       Up to 30 rides will be auto-created. Each ride will have the same route, time, and preferences.
                     </p>
                   </div>
@@ -489,10 +556,31 @@ const RegisterRide = () => {
               <div className="space-y-4">
                 <Label>Trip Preferences</Label>
                 <div className="space-y-3">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox id="return_ride" checked={formData.return_ride} onCheckedChange={(checked) => handleInputChange('return_ride', checked as boolean)} />
-                    <Label htmlFor="return_ride">This is a return ride</Label>
+                  {/* Return Ride */}
+                  <div className="space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox id="return_ride" checked={formData.return_ride} onCheckedChange={(checked) => handleInputChange('return_ride', checked as boolean)} />
+                      <Label htmlFor="return_ride" className="flex items-center gap-2">
+                        <RotateCcw className="h-4 w-4" />
+                        Add a return ride
+                      </Label>
+                    </div>
+                    {formData.return_ride && (
+                      <div className="pl-6 border-l-2 border-primary/20 space-y-2">
+                        <Label htmlFor="return_time">Return time</Label>
+                        <Input
+                          id="return_time"
+                          type="time"
+                          value={formData.return_time}
+                          onChange={(e) => handleInputChange('return_time', e.target.value)}
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          A return ride ({formData.arrival_city || '...'} → {formData.departure_city || '...'}) will be created at this time on the same day.
+                        </p>
+                      </div>
+                    )}
                   </div>
+
                   <div className="flex items-center space-x-2">
                     <Checkbox id="smoking" checked={formData.smoking_allowed} onCheckedChange={(checked) => handleInputChange('smoking_allowed', checked as boolean)} />
                     <Label htmlFor="smoking">Smoking allowed</Label>
