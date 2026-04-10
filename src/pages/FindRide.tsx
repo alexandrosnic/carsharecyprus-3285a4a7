@@ -9,6 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Search, MapPin, Calendar, Users, X, Map, Filter } from 'lucide-react';
+import LocationInput from '@/components/LocationInput';
 
 interface SearchFilters {
   departure: string;
