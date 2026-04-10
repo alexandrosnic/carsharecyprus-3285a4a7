@@ -294,6 +294,30 @@ const RegisterRide = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
+              {/* Vehicle Info */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="vehicle_make">Vehicle Make/Model</Label>
+                  <Input
+                    id="vehicle_make"
+                    value={formData.vehicle_make}
+                    onChange={(e) => handleInputChange('vehicle_make', e.target.value)}
+                    placeholder="e.g. Toyota Yaris"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="vehicle_color">Vehicle Color</Label>
+                  <Input
+                    id="vehicle_color"
+                    value={formData.vehicle_color}
+                    onChange={(e) => handleInputChange('vehicle_color', e.target.value)}
+                    placeholder="e.g. White"
+                  />
+                </div>
+              </div>
+
+              <Separator />
+
               {/* Luggage Size */}
               <div className="space-y-2">
                 <Label htmlFor="luggage">Luggage Size Allowed</Label>
