@@ -117,14 +117,11 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <header className="bg-card shadow-sm border-b border-border">
         <div className="max-w-6xl mx-auto px-4 py-3">
-          <div className="flex items-center justify-center relative mb-2">
+          <div className="flex items-center justify-center mb-2">
             <div className="flex items-center gap-2">
               <img src="/lovable-uploads/834c900c-913f-46a2-b82c-ee88234635ae.png" alt="Car Share Cyprus Logo" className="h-10" />
               <h1 className="text-4xl font-bold text-foreground whitespace-nowrap">Car Share Cyprus</h1>
             </div>
-            <Button variant="outline" size="sm" className="text-xs px-3 whitespace-nowrap absolute right-0" onClick={() => signOut()}>
-              Sign Out
-            </Button>
           </div>
           <div className="flex items-center justify-end gap-2">
             <Button variant="ghost" size="sm" className="text-sm px-2" onClick={() => navigate('/profile')}>
