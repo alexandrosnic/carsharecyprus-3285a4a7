@@ -384,7 +384,7 @@ const RideDetails = () => {
 
               {/* Driver Reviews */}
               {ride.driver_profile?.user_id && (
-                <DriverReviews driverId={ride.driver_profile.user_id} />
+                <UserReviews userId={ride.driver_profile.user_id} label="Driver Reviews" />
               )}
 
               {/* Route Map */}
