@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { ArrowLeft, Camera, Star, User, Phone, Mail, Save, Shield, Loader2, MessageSquare, Banknote, ExternalLink, Cake } from 'lucide-react';
+import { ArrowLeft, Camera, Star, User, Phone, Mail, Save, Shield, Loader2, MessageSquare, Banknote, ExternalLink, Cake, LogOut } from 'lucide-react';
 import { BRAND_LOGO } from '@/constants/brand';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -34,7 +34,7 @@ interface Review {
 }
 
 const Profile = () => {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(true);
@@ -526,6 +526,19 @@ const Profile = () => {
               )}
             </CardContent>
           </Card>
+
+          {/* Sign Out */}
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={async () => {
+              await signOut();
+              navigate('/auth');
+            }}
+          >
+            <LogOut className="h-4 w-4 mr-2" />
+            Sign Out
+          </Button>
         </div>
       </main>
     </div>
