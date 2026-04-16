@@ -12,24 +12,25 @@ interface Review {
   rater_name: string;
 }
 
-interface DriverReviewsProps {
-  driverId: string;
+interface UserReviewsProps {
+  userId: string;
+  label?: string;
 }
 
-const DriverReviews = ({ driverId }: DriverReviewsProps) => {
+const UserReviews = ({ userId, label = 'Reviews' }: UserReviewsProps) => {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchReviews();
-  }, [driverId]);
+  }, [userId]);
 
   const fetchReviews = async () => {
     try {
       const { data: ratingsData, error } = await supabase
         .from('ratings')
         .select('id, rating, comment, created_at, rater_id')
-        .eq('rated_user_id', driverId)
+        .eq('rated_user_id', userId)
         .order('created_at', { ascending: false })
         .limit(10);
 
@@ -65,7 +66,7 @@ const DriverReviews = ({ driverId }: DriverReviewsProps) => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <MessageSquare className="h-5 w-5" />
-          Driver Reviews ({reviews.length})
+          {label} ({reviews.length})
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -104,4 +105,4 @@ const DriverReviews = ({ driverId }: DriverReviewsProps) => {
   );
 };
 
-export default DriverReviews;
+export default UserReviews;
