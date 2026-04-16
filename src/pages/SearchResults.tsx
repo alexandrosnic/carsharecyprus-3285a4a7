@@ -378,11 +378,15 @@ const SearchResults = () => {
                 {date && ` on ${formatDate(date + 'T12:00:00')}`}
               </p>
               <p className="text-sm text-muted-foreground mb-6">
-                Try a different date, fewer passengers, or create your own ride
+                Try a different date, fewer passengers, or post a request so drivers can find you
               </p>
-              <div className="flex gap-4 justify-center">
+              <div className="flex flex-wrap gap-4 justify-center">
                 <Button onClick={() => navigate('/find-ride')}>Modify Search</Button>
                 <Button variant="outline" onClick={() => navigate('/register-ride')}>Offer This Ride</Button>
+                <Button variant="secondary" onClick={() => setRequestDialogOpen(true)}>
+                  <HandHelping className="h-4 w-4 mr-2" />
+                  Request This Ride
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -492,11 +496,96 @@ const SearchResults = () => {
           </div>
         )}
 
-        <div className="mt-8 text-center">
+        {/* Request a ride CTA */}
+        <Card className="mt-6 border-dashed">
+          <CardContent className="p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div>
+              <h4 className="font-semibold text-foreground">Can't find the right ride?</h4>
+              <p className="text-sm text-muted-foreground">Post a request and let drivers come to you</p>
+            </div>
+            <Button variant="secondary" onClick={() => setRequestDialogOpen(true)}>
+              <HandHelping className="h-4 w-4 mr-2" />
+              Request a Ride
+            </Button>
+          </CardContent>
+        </Card>
+
+        <div className="mt-6 text-center">
           <Button variant="outline" onClick={() => navigate('/find-ride')}>
             Modify Search Criteria
           </Button>
         </div>
+
+        {/* Request Ride Dialog */}
+        <Dialog open={requestDialogOpen} onOpenChange={setRequestDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Request a Ride</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 mt-2">
+              <div className="space-y-2">
+                <Label>From</Label>
+                <LocationInput
+                  value={requestForm.departure_city}
+                  onChange={(val) => setRequestForm(prev => ({ ...prev, departure_city: val }))}
+                  placeholder="Departure city..."
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>To</Label>
+                <LocationInput
+                  value={requestForm.arrival_city}
+                  onChange={(val) => setRequestForm(prev => ({ ...prev, arrival_city: val }))}
+                  placeholder="Destination city..."
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Date</Label>
+                  <Input
+                    type="date"
+                    value={requestForm.desired_date}
+                    onChange={(e) => setRequestForm(prev => ({ ...prev, desired_date: e.target.value }))}
+                    min={new Date().toISOString().split('T')[0]}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Seats needed</Label>
+                  <Input
+                    type="number"
+                    min={1}
+                    max={6}
+                    value={requestForm.seats_needed}
+                    onChange={(e) => setRequestForm(prev => ({ ...prev, seats_needed: parseInt(e.target.value) || 1 }))}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Max price (€, optional)</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  value={requestForm.max_price}
+                  onChange={(e) => setRequestForm(prev => ({ ...prev, max_price: e.target.value }))}
+                  placeholder="Any"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Additional details (optional)</Label>
+                <Textarea
+                  value={requestForm.description}
+                  onChange={(e) => setRequestForm(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder="Any specific needs or preferences..."
+                  rows={2}
+                  maxLength={300}
+                />
+              </div>
+              <Button className="w-full" onClick={handleSubmitRequest} disabled={submittingRequest}>
+                {submittingRequest ? 'Posting...' : 'Post Ride Request'}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
