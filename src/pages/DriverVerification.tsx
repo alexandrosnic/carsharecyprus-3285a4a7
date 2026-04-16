@@ -6,9 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Upload, Shield, CheckCircle, XCircle, Clock } from "lucide-react";
+import { ArrowLeft, Shield, CheckCircle, XCircle, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 interface VerificationData {
@@ -17,7 +17,7 @@ interface VerificationData {
   license_image_url: string;
   vehicle_registration: string;
   vehicle_image_url: string;
-  insurance_document_url: string;
+  insurance_covers_passengers: boolean;
   verification_status: 'pending' | 'approved' | 'rejected';
   admin_notes?: string;
 }
@@ -33,7 +33,7 @@ const DriverVerification = () => {
     license_image_url: '',
     vehicle_registration: '',
     vehicle_image_url: '',
-    insurance_document_url: '',
+    insurance_covers_passengers: false,
     verification_status: 'pending'
   });
 
@@ -53,14 +53,18 @@ const DriverVerification = () => {
         .eq('driver_id', user?.id)
         .single();
 
-      if (error && error.code !== 'PGRST116') {
-        throw error;
-      }
+      if (error && error.code !== 'PGRST116') throw error;
 
       if (data) {
         setVerification({
-          ...data,
-          verification_status: data.verification_status as 'pending' | 'approved' | 'rejected'
+          id: data.id,
+          license_number: data.license_number || '',
+          license_image_url: data.license_image_url || '',
+          vehicle_registration: data.vehicle_registration || '',
+          vehicle_image_url: data.vehicle_image_url || '',
+          insurance_covers_passengers: (data as any).insurance_covers_passengers ?? false,
+          verification_status: data.verification_status as 'pending' | 'approved' | 'rejected',
+          admin_notes: data.admin_notes || undefined,
         });
       }
     } catch (error) {
@@ -74,6 +78,15 @@ const DriverVerification = () => {
     e.preventDefault();
     if (!user) return;
 
+    if (!verification.insurance_covers_passengers) {
+      toast({
+        title: "Insurance confirmation required",
+        description: "Please confirm your insurance covers passengers and that you will not seek to make a profit.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setSubmitting(true);
     try {
       const verificationData = {
@@ -82,44 +95,28 @@ const DriverVerification = () => {
         license_image_url: verification.license_image_url,
         vehicle_registration: verification.vehicle_registration,
         vehicle_image_url: verification.vehicle_image_url,
-        insurance_document_url: verification.insurance_document_url,
-        verification_status: 'pending' as const
+        insurance_covers_passengers: verification.insurance_covers_passengers,
+        verification_status: 'pending' as const,
       };
 
       if (verification.id) {
-        // Update existing
         const { error } = await supabase
           .from('driver_verifications')
           .update(verificationData)
           .eq('id', verification.id);
-
         if (error) throw error;
-
-        toast({
-          title: "Verification Updated! ✅",
-          description: "Your verification documents have been updated and are under review.",
-        });
+        toast({ title: "Verification Updated! ✅", description: "Your verification documents have been updated and are under review." });
       } else {
-        // Insert new
         const { error } = await supabase
           .from('driver_verifications')
           .insert(verificationData);
-
         if (error) throw error;
-
-        toast({
-          title: "Verification Submitted! ✅",
-          description: "Your verification documents have been submitted for review.",
-        });
+        toast({ title: "Verification Submitted! ✅", description: "Your verification documents have been submitted for review." });
       }
 
       fetchVerification();
     } catch (error: any) {
-      toast({
-        title: "Submission Error",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast({ title: "Submission Error", description: error.message, variant: "destructive" });
     } finally {
       setSubmitting(false);
     }
@@ -147,14 +144,12 @@ const DriverVerification = () => {
     );
   }
 
+  const disabled = verification.verification_status === 'approved';
+
   return (
     <div className="min-h-screen bg-background p-4">
       <div className="max-w-4xl mx-auto">
-        <Button 
-          variant="ghost" 
-          onClick={() => navigate('/profile')}
-          className="mb-6"
-        >
+        <Button variant="ghost" onClick={() => navigate('/profile')} className="mb-6">
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Profile
         </Button>
@@ -205,7 +200,7 @@ const DriverVerification = () => {
                       onChange={(e) => setVerification(prev => ({ ...prev, license_number: e.target.value }))}
                       placeholder="Enter license number"
                       required
-                      disabled={verification.verification_status === 'approved'}
+                      disabled={disabled}
                     />
                   </div>
                   <div>
@@ -217,21 +212,21 @@ const DriverVerification = () => {
                       onChange={(e) => setVerification(prev => ({ ...prev, license_image_url: e.target.value }))}
                       placeholder="Upload and paste image URL"
                       required
-                      disabled={verification.verification_status === 'approved'}
+                      disabled={disabled}
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <Label htmlFor="vehicle_registration">Vehicle Registration</Label>
+                    <Label htmlFor="vehicle_registration">Plate Number</Label>
                     <Input
                       id="vehicle_registration"
                       value={verification.vehicle_registration}
                       onChange={(e) => setVerification(prev => ({ ...prev, vehicle_registration: e.target.value }))}
-                      placeholder="Enter registration number"
+                      placeholder="e.g. ABC 123"
                       required
-                      disabled={verification.verification_status === 'approved'}
+                      disabled={disabled}
                     />
                   </div>
                   <div>
@@ -243,47 +238,43 @@ const DriverVerification = () => {
                       onChange={(e) => setVerification(prev => ({ ...prev, vehicle_image_url: e.target.value }))}
                       placeholder="Upload and paste image URL"
                       required
-                      disabled={verification.verification_status === 'approved'}
+                      disabled={disabled}
                     />
                   </div>
                 </div>
 
-                <div>
-                  <Label htmlFor="insurance_document">Insurance Document URL</Label>
-                  <Input
-                    id="insurance_document"
-                    type="url"
-                    value={verification.insurance_document_url}
-                    onChange={(e) => setVerification(prev => ({ ...prev, insurance_document_url: e.target.value }))}
-                    placeholder="Upload and paste insurance document URL"
-                    required
-                    disabled={verification.verification_status === 'approved'}
-                  />
+                <div className="bg-accent/30 p-4 rounded-lg">
+                  <div className="flex items-start gap-3">
+                    <Checkbox
+                      id="insurance_covers_passengers"
+                      checked={verification.insurance_covers_passengers}
+                      onCheckedChange={(checked) => setVerification(prev => ({ ...prev, insurance_covers_passengers: checked === true }))}
+                      disabled={disabled}
+                      className="mt-1"
+                    />
+                    <Label htmlFor="insurance_covers_passengers" className="text-sm leading-relaxed cursor-pointer">
+                      My insurance covers passengers and I will not seek to make a profit from these trips.
+                    </Label>
+                  </div>
                 </div>
 
                 <div className="bg-accent/30 p-4 rounded-lg">
                   <h4 className="font-medium text-foreground mb-2">Verification Requirements</h4>
                   <ul className="text-sm text-muted-foreground space-y-1">
                     <li>• Valid driver's license (not expired)</li>
-                    <li>• Current vehicle registration documents</li>
-                    <li>• Valid insurance certificate</li>
-                    <li>• All documents must be clearly visible and readable</li>
+                    <li>• Current vehicle plate number</li>
+                    <li>• Clear photo of your vehicle</li>
+                    <li>• Insurance that covers passengers (cost-sharing only — no profit)</li>
+                    <li>• All images must be clearly visible and readable</li>
                   </ul>
                 </div>
 
-                {verification.verification_status !== 'approved' && (
+                {!disabled && (
                   <div className="flex justify-end gap-3">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => navigate('/profile')}
-                    >
+                    <Button type="button" variant="outline" onClick={() => navigate('/profile')}>
                       Cancel
                     </Button>
-                    <Button
-                      type="submit"
-                      disabled={submitting}
-                    >
+                    <Button type="submit" disabled={submitting}>
                       {submitting ? 'Submitting...' : verification.id ? 'Update Verification' : 'Submit for Verification'}
                     </Button>
                   </div>

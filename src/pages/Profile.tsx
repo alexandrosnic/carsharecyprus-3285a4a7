@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { ArrowLeft, Camera, Star, User, Phone, Mail, Save, Shield, Loader2, MessageSquare, Banknote, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Camera, Star, User, Phone, Mail, Save, Shield, Loader2, MessageSquare, Banknote, ExternalLink, Cake } from 'lucide-react';
 import { BRAND_LOGO } from '@/constants/brand';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -18,6 +18,7 @@ interface ProfileData {
   full_name: string;
   phone_number: string;
   avatar_url: string;
+  date_of_birth: string;
   rating: number;
   total_rides: number;
   stripe_account_id?: string;
@@ -45,6 +46,7 @@ const Profile = () => {
     full_name: '',
     phone_number: '',
     avatar_url: '',
+    date_of_birth: '',
     rating: 5.0,
     total_rides: 0,
   });
@@ -120,6 +122,7 @@ const Profile = () => {
           full_name: data.full_name || '',
           phone_number: data.phone_number || '',
           avatar_url: data.avatar_url || '',
+          date_of_birth: (data as any).date_of_birth || '',
           rating: data.rating || 5.0,
           total_rides: data.total_rides || 0,
           stripe_account_id: (data as any).stripe_account_id || undefined,
@@ -197,8 +200,9 @@ const Profile = () => {
           full_name: profileData.full_name,
           phone_number: profileData.phone_number,
           avatar_url: profileData.avatar_url,
+          date_of_birth: profileData.date_of_birth || null,
           updated_at: new Date().toISOString(),
-        })
+        } as any)
         .eq('user_id', user.id);
 
       if (error) throw error;
@@ -336,6 +340,21 @@ const Profile = () => {
                       onChange={(e) => handleInputChange('phone_number', e.target.value)}
                       className="pl-9"
                       placeholder="+357 99 123456"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="date_of_birth">Date of Birth</Label>
+                  <div className="relative">
+                    <Cake className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="date_of_birth"
+                      type="date"
+                      value={profileData.date_of_birth}
+                      onChange={(e) => handleInputChange('date_of_birth', e.target.value)}
+                      className="pl-9"
+                      max={new Date().toISOString().split('T')[0]}
                     />
                   </div>
                 </div>

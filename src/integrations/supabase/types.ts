@@ -162,6 +162,7 @@ export type Database = {
           created_at: string
           driver_id: string
           id: string
+          insurance_covers_passengers: boolean
           insurance_document_url: string | null
           license_image_url: string | null
           license_number: string | null
@@ -176,6 +177,7 @@ export type Database = {
           created_at?: string
           driver_id: string
           id?: string
+          insurance_covers_passengers?: boolean
           insurance_document_url?: string | null
           license_image_url?: string | null
           license_number?: string | null
@@ -190,6 +192,7 @@ export type Database = {
           created_at?: string
           driver_id?: string
           id?: string
+          insurance_covers_passengers?: boolean
           insurance_document_url?: string | null
           license_image_url?: string | null
           license_number?: string | null
@@ -235,6 +238,7 @@ export type Database = {
         Row: {
           avatar_url: string | null
           created_at: string
+          date_of_birth: string | null
           full_name: string
           id: string
           phone_number: string | null
@@ -248,6 +252,7 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           created_at?: string
+          date_of_birth?: string | null
           full_name: string
           id?: string
           phone_number?: string | null
@@ -261,6 +266,7 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           created_at?: string
+          date_of_birth?: string | null
           full_name?: string
           id?: string
           phone_number?: string | null
