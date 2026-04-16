@@ -1,16 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, Clock, MapPin, Star, Users, Car, Filter, Cigarette, PawPrint, Briefcase, ArrowRight, ChevronRight } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { ArrowLeft, Clock, MapPin, Star, Users, Car, Filter, Cigarette, PawPrint, Briefcase, ArrowRight, ChevronRight, HandHelping } from "lucide-react";
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { getEstimatedDuration, formatDuration } from '@/constants/travelTimes';
+import { toast } from 'sonner';
+import LocationInput from '@/components/LocationInput';
 
 interface Ride {
   id: string;
@@ -41,6 +46,7 @@ interface Ride {
 
 const SearchResults = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [searchParams] = useSearchParams();
   const [rides, setRides] = useState<Ride[]>([]);
   const [loading, setLoading] = useState(true);
@@ -51,15 +57,73 @@ const SearchResults = () => {
   const [minSeats, setMinSeats] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
 
+  // Ride request dialog
+  const [requestDialogOpen, setRequestDialogOpen] = useState(false);
+  const [submittingRequest, setSubmittingRequest] = useState(false);
+  const [requestForm, setRequestForm] = useState({
+    departure_city: '',
+    arrival_city: '',
+    desired_date: '',
+    desired_time: '',
+    seats_needed: 1,
+    max_price: '',
+    description: '',
+  });
+
   const departure = searchParams.get('departure') || '';
   const destination = searchParams.get('destination') || '';
   const date = searchParams.get('date') || '';
   const time = searchParams.get('time') || '';
   const passengers = parseInt(searchParams.get('passengers') || '1');
 
+  // Pre-fill request form from search params
+  useEffect(() => {
+    setRequestForm(prev => ({
+      ...prev,
+      departure_city: departure,
+      arrival_city: destination,
+      desired_date: date,
+      desired_time: time,
+      seats_needed: passengers,
+    }));
+  }, [departure, destination, date, time, passengers]);
+
   useEffect(() => {
     fetchRides();
   }, [searchParams, sortBy, priceRange, minSeats]);
+
+  const handleSubmitRequest = async () => {
+    if (!user) {
+      toast.error('Please sign in to post a ride request');
+      navigate('/auth');
+      return;
+    }
+    if (!requestForm.departure_city || !requestForm.arrival_city || !requestForm.desired_date) {
+      toast.error('Please fill in departure, destination, and date');
+      return;
+    }
+    setSubmittingRequest(true);
+    try {
+      const { error } = await supabase.from('ride_requests').insert({
+        passenger_id: user.id,
+        departure_city: requestForm.departure_city,
+        arrival_city: requestForm.arrival_city,
+        desired_date: requestForm.desired_date,
+        desired_time: requestForm.desired_time || null,
+        seats_needed: requestForm.seats_needed,
+        max_price: requestForm.max_price ? parseFloat(requestForm.max_price) : null,
+        description: requestForm.description.trim() || null,
+      });
+      if (error) throw error;
+      toast.success('Ride request posted! Drivers will see your request.');
+      setRequestDialogOpen(false);
+    } catch (error: any) {
+      console.error('Error posting ride request:', error);
+      toast.error('Failed to post ride request');
+    } finally {
+      setSubmittingRequest(false);
+    }
+  };
 
   // Extract the core city name from a full address for fuzzy matching
   const extractCity = (location: string): string => {
@@ -314,11 +378,15 @@ const SearchResults = () => {
                 {date && ` on ${formatDate(date + 'T12:00:00')}`}
               </p>
               <p className="text-sm text-muted-foreground mb-6">
-                Try a different date, fewer passengers, or create your own ride
+                Try a different date, fewer passengers, or post a request so drivers can find you
               </p>
-              <div className="flex gap-4 justify-center">
+              <div className="flex flex-wrap gap-4 justify-center">
                 <Button onClick={() => navigate('/find-ride')}>Modify Search</Button>
                 <Button variant="outline" onClick={() => navigate('/register-ride')}>Offer This Ride</Button>
+                <Button variant="secondary" onClick={() => setRequestDialogOpen(true)}>
+                  <HandHelping className="h-4 w-4 mr-2" />
+                  Request This Ride
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -428,11 +496,96 @@ const SearchResults = () => {
           </div>
         )}
 
-        <div className="mt-8 text-center">
+        {/* Request a ride CTA */}
+        <Card className="mt-6 border-dashed">
+          <CardContent className="p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div>
+              <h4 className="font-semibold text-foreground">Can't find the right ride?</h4>
+              <p className="text-sm text-muted-foreground">Post a request and let drivers come to you</p>
+            </div>
+            <Button variant="secondary" onClick={() => setRequestDialogOpen(true)}>
+              <HandHelping className="h-4 w-4 mr-2" />
+              Request a Ride
+            </Button>
+          </CardContent>
+        </Card>
+
+        <div className="mt-6 text-center">
           <Button variant="outline" onClick={() => navigate('/find-ride')}>
             Modify Search Criteria
           </Button>
         </div>
+
+        {/* Request Ride Dialog */}
+        <Dialog open={requestDialogOpen} onOpenChange={setRequestDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Request a Ride</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 mt-2">
+              <div className="space-y-2">
+                <Label>From</Label>
+                <LocationInput
+                  value={requestForm.departure_city}
+                  onChange={(val) => setRequestForm(prev => ({ ...prev, departure_city: val }))}
+                  placeholder="Departure city..."
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>To</Label>
+                <LocationInput
+                  value={requestForm.arrival_city}
+                  onChange={(val) => setRequestForm(prev => ({ ...prev, arrival_city: val }))}
+                  placeholder="Destination city..."
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Date</Label>
+                  <Input
+                    type="date"
+                    value={requestForm.desired_date}
+                    onChange={(e) => setRequestForm(prev => ({ ...prev, desired_date: e.target.value }))}
+                    min={new Date().toISOString().split('T')[0]}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Seats needed</Label>
+                  <Input
+                    type="number"
+                    min={1}
+                    max={6}
+                    value={requestForm.seats_needed}
+                    onChange={(e) => setRequestForm(prev => ({ ...prev, seats_needed: parseInt(e.target.value) || 1 }))}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Max price (€, optional)</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  value={requestForm.max_price}
+                  onChange={(e) => setRequestForm(prev => ({ ...prev, max_price: e.target.value }))}
+                  placeholder="Any"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Additional details (optional)</Label>
+                <Textarea
+                  value={requestForm.description}
+                  onChange={(e) => setRequestForm(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder="Any specific needs or preferences..."
+                  rows={2}
+                  maxLength={300}
+                />
+              </div>
+              <Button className="w-full" onClick={handleSubmitRequest} disabled={submittingRequest}>
+                {submittingRequest ? 'Posting...' : 'Post Ride Request'}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
