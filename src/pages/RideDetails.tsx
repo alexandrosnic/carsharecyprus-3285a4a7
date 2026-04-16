@@ -10,7 +10,7 @@ import { Separator } from '@/components/ui/separator';
 import { ArrowLeft, MapPin, Clock, Users, Star, Phone, MessageCircle, Car, DollarSign, Cigarette, PawPrint, Briefcase } from 'lucide-react';
 import { toast } from 'sonner';
 import Map from '@/components/Map';
-import DriverReviews from '@/components/DriverReviews';
+import UserReviews from '@/components/UserReviews';
 import { getEstimatedDuration, formatDuration } from '@/constants/travelTimes';
 
 interface RideDetails {

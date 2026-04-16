@@ -30,7 +30,7 @@ const UserReviews = ({ userId, label = 'Reviews' }: UserReviewsProps) => {
       const { data: ratingsData, error } = await supabase
         .from('ratings')
         .select('id, rating, comment, created_at, rater_id')
-        .eq('rated_user_id', driverId)
+        .eq('rated_user_id', userId)
         .order('created_at', { ascending: false })
         .limit(10);
 
@@ -105,4 +105,4 @@ const UserReviews = ({ userId, label = 'Reviews' }: UserReviewsProps) => {
   );
 };
 
-export default DriverReviews;
+export default UserReviews;
