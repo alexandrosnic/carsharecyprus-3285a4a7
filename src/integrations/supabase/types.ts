@@ -336,6 +336,51 @@ export type Database = {
         }
         Relationships: []
       }
+      ride_requests: {
+        Row: {
+          arrival_city: string
+          created_at: string
+          departure_city: string
+          description: string | null
+          desired_date: string
+          desired_time: string | null
+          id: string
+          max_price: number | null
+          passenger_id: string
+          seats_needed: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          arrival_city: string
+          created_at?: string
+          departure_city: string
+          description?: string | null
+          desired_date: string
+          desired_time?: string | null
+          id?: string
+          max_price?: number | null
+          passenger_id: string
+          seats_needed?: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          arrival_city?: string
+          created_at?: string
+          departure_city?: string
+          description?: string | null
+          desired_date?: string
+          desired_time?: string | null
+          id?: string
+          max_price?: number | null
+          passenger_id?: string
+          seats_needed?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       ride_stops: {
         Row: {
           city: string
