@@ -65,6 +65,22 @@ export function getEstimatedDuration(from: string, to: string): number | null {
   return travelTimes[from]?.[to] ?? null;
 }
 
+// Approximate distance (km) based on travel time at average Cyprus highway speed (~70 km/h)
+export function getEstimatedDistanceKm(from: string, to: string): number | null {
+  const minutes = getEstimatedDuration(from, to);
+  if (minutes == null) return null;
+  return Math.round((minutes / 60) * 70);
+}
+
+// Price ceiling: drivers must not profit. Cyprus fuel + minor wear estimate.
+export const MAX_PRICE_PER_KM = 0.20;
+
+export function getMaxPricePerSeat(from: string, to: string): number | null {
+  const km = getEstimatedDistanceKm(from, to);
+  if (km == null) return null;
+  return Math.round(km * MAX_PRICE_PER_KM * 100) / 100;
+}
+
 export function formatDuration(minutes: number): string {
   const hours = Math.floor(minutes / 60);
   const mins = minutes % 60;

@@ -12,7 +12,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
 import { ArrowLeft, Car, MapPin, Calendar, Users, Euro, Plus, Clock, Trash2, Save } from 'lucide-react';
 import { toast } from 'sonner';
-import { getEstimatedDuration, formatDuration } from '@/constants/travelTimes';
+import { getEstimatedDuration, formatDuration, getEstimatedDistanceKm, getMaxPricePerSeat, MAX_PRICE_PER_KM } from '@/constants/travelTimes';
 import LocationInput, { LocationResult } from '@/components/LocationInput';
 import ClickableMap, { MapMarkerData } from '@/components/ClickableMap';
 
@@ -132,6 +132,11 @@ const EditRide = () => {
     if (!formData.departure_city || !formData.arrival_city) { toast.error('Please select departure and destination'); return; }
     if (!formData.departure_time) { toast.error('Please select departure date and time'); return; }
     if (!formData.price_per_seat || parseFloat(formData.price_per_seat) <= 0) { toast.error('Please enter a valid price'); return; }
+    const maxPrice = getMaxPricePerSeat(formData.departure_city, formData.arrival_city);
+    if (maxPrice != null && parseFloat(formData.price_per_seat) > maxPrice) {
+      toast.error(`Price per seat cannot exceed €${maxPrice.toFixed(2)} (€${MAX_PRICE_PER_KM}/km cost-sharing limit)`);
+      return;
+    }
 
     setLoading(true);
     try {
@@ -419,30 +424,43 @@ const EditRide = () => {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label>Price per Seat (€) *</Label>
-                <div className="relative">
-                  <Euro className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input type="number" step="0.01" min="0" value={formData.price_per_seat} onChange={(e) => handleInputChange('price_per_seat', e.target.value)} className="pl-9" placeholder="15.00" required />
-                </div>
-                {formData.price_per_seat && parseFloat(formData.price_per_seat) > 0 && (
-                  <div className="p-3 bg-accent/50 rounded-lg space-y-1">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Passenger pays:</span>
-                      <span className="font-medium">€{parseFloat(formData.price_per_seat).toFixed(2)}</span>
+              {(() => {
+                const maxPrice = getMaxPricePerSeat(formData.departure_city, formData.arrival_city);
+                const km = getEstimatedDistanceKm(formData.departure_city, formData.arrival_city);
+                const currentPrice = parseFloat(formData.price_per_seat);
+                const overLimit = maxPrice != null && currentPrice > maxPrice;
+                return (
+                  <div className="space-y-2">
+                    <Label>Price per Seat (€) *</Label>
+                    <div className="relative">
+                      <Euro className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input type="number" step="0.01" min="0" max={maxPrice ?? undefined} value={formData.price_per_seat} onChange={(e) => handleInputChange('price_per_seat', e.target.value)} className="pl-9" placeholder="15.00" required />
                     </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Platform fee (10%):</span>
-                      <span className="font-medium text-destructive">−€{(parseFloat(formData.price_per_seat) * 0.10).toFixed(2)}</span>
-                    </div>
-                    <Separator className="my-1" />
-                    <div className="flex justify-between text-sm font-semibold">
-                      <span>You'll earn:</span>
-                      <span className="text-primary">€{(parseFloat(formData.price_per_seat) * 0.90).toFixed(2)}</span>
-                    </div>
+                    {maxPrice != null && (
+                      <p className={`text-sm ${overLimit ? 'text-destructive font-medium' : 'text-muted-foreground'}`}>
+                        Cost-sharing limit: max €{maxPrice.toFixed(2)} per seat (~{km} km × €{MAX_PRICE_PER_KM.toFixed(2)}/km).
+                      </p>
+                    )}
+                    {formData.price_per_seat && currentPrice > 0 && (
+                      <div className="p-3 bg-accent/50 rounded-lg space-y-1">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">Passenger pays:</span>
+                          <span className="font-medium">€{currentPrice.toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">Platform fee (10%):</span>
+                          <span className="font-medium text-destructive">−€{(currentPrice * 0.10).toFixed(2)}</span>
+                        </div>
+                        <Separator className="my-1" />
+                        <div className="flex justify-between text-sm font-semibold">
+                          <span>You'll earn:</span>
+                          <span className="text-primary">€{(currentPrice * 0.90).toFixed(2)}</span>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
+                );
+              })()}
 
               <div className="space-y-2">
                 <Label>Description (Optional)</Label>
