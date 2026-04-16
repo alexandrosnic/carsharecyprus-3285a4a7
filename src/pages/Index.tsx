@@ -10,6 +10,7 @@ import { Plus, Search, User, MapPin, Clock, Star, Users, Cigarette, PawPrint, Br
 import { BRAND_LOGO } from '@/constants/brand';
 import { NotificationCenter } from '@/components/notifications/NotificationCenter';
 import { getEstimatedDuration, formatDuration } from '@/constants/travelTimes';
+import RatingPrompt from '@/components/RatingPrompt';
 
 interface RideFeed {
   id: string;
@@ -138,6 +139,9 @@ const Index = () => {
           <h2 className="text-4xl font-bold mb-4 text-foreground">Share rides across Cyprus</h2>
           <p className="text-xl text-muted-foreground mb-8">Find or offer rides, save money, and protect the environment</p>
         </div>
+
+        {/* Rating Prompt for unrated past rides */}
+        <RatingPrompt />
 
         {/* Action Cards */}
         <div className="grid md:grid-cols-3 gap-6 mb-12">
