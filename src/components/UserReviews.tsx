@@ -12,17 +12,18 @@ interface Review {
   rater_name: string;
 }
 
-interface DriverReviewsProps {
-  driverId: string;
+interface UserReviewsProps {
+  userId: string;
+  label?: string;
 }
 
-const DriverReviews = ({ driverId }: DriverReviewsProps) => {
+const UserReviews = ({ userId, label = 'Reviews' }: UserReviewsProps) => {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchReviews();
-  }, [driverId]);
+  }, [userId]);
 
   const fetchReviews = async () => {
     try {
