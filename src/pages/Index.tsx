@@ -185,70 +185,73 @@ const Index = () => {
                   onClick={() => navigate(`/ride/${ride.id}`)}
                 >
                   <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-2 mb-1">
-                          <MapPin className="h-4 w-4 text-muted-foreground" />
-                          <span className="font-medium">{ride.departure_city}</span>
-                          <span className="text-muted-foreground">→</span>
-                          <span className="font-medium">{ride.arrival_city}</span>
-                          {(() => {
-                            const dur = getEstimatedDuration(ride.departure_city, ride.arrival_city);
-                            return dur ? (
-                              <Badge variant="outline" className="text-xs py-0 ml-1">
-                                <Clock className="h-3 w-3 mr-1" />{formatDuration(dur)}
-                              </Badge>
-                            ) : null;
-                          })()}
-                        </div>
-                        <div className="flex items-center flex-wrap gap-3 text-sm text-muted-foreground">
-                          <span className="flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
-                            {formatTime(ride.departure_time)} • {formatDate(ride.departure_time)}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Users className="h-3 w-3" />
-                            {ride.available_seats} seat{ride.available_seats > 1 ? 's' : ''}
-                          </span>
-                          {ride.vehicle_make && (
-                            <span className="text-xs">
-                              {ride.vehicle_color} {ride.vehicle_make}
-                            </span>
-                          )}
-                        </div>
-                        {/* Preferences badges */}
-                        <div className="flex gap-1 mt-2">
-                          {ride.smoking_allowed && (
-                            <Badge variant="outline" className="text-xs py-0"><Cigarette className="h-3 w-3 mr-1" />Smoking OK</Badge>
-                          )}
-                          {ride.pets_allowed && (
-                            <Badge variant="outline" className="text-xs py-0"><PawPrint className="h-3 w-3 mr-1" />Pets OK</Badge>
-                          )}
-                          {ride.luggage_size && ride.luggage_size !== 'medium' && (
-                            <Badge variant="outline" className="text-xs py-0"><Briefcase className="h-3 w-3 mr-1" />{ride.luggage_size} luggage</Badge>
-                          )}
-                        </div>
+                    <div className="flex flex-col gap-3">
+                      {/* Route */}
+                      <div className="flex items-center flex-wrap gap-1">
+                        <MapPin className="h-4 w-4 text-muted-foreground shrink-0" />
+                        <span className="font-medium truncate">{ride.departure_city}</span>
+                        <span className="text-muted-foreground">→</span>
+                        <span className="font-medium truncate">{ride.arrival_city}</span>
+                        {(() => {
+                          const dur = getEstimatedDuration(ride.departure_city, ride.arrival_city);
+                          return dur ? (
+                            <Badge variant="outline" className="text-xs py-0 ml-1">
+                              <Clock className="h-3 w-3 mr-1" />{formatDuration(dur)}
+                            </Badge>
+                          ) : null;
+                        })()}
                       </div>
 
-                      <div className="flex items-center space-x-4">
+                      {/* Details row */}
+                      <div className="flex items-center flex-wrap gap-3 text-sm text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          {formatTime(ride.departure_time)} • {formatDate(ride.departure_time)}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Users className="h-3 w-3" />
+                          {ride.available_seats} seat{ride.available_seats > 1 ? 's' : ''}
+                        </span>
+                        {ride.vehicle_make && (
+                          <span className="text-xs truncate">
+                            {ride.vehicle_color} {ride.vehicle_make}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Preferences badges */}
+                      <div className="flex flex-wrap gap-1">
+                        {ride.smoking_allowed && (
+                          <Badge variant="outline" className="text-xs py-0"><Cigarette className="h-3 w-3 mr-1" />Smoking OK</Badge>
+                        )}
+                        {ride.pets_allowed && (
+                          <Badge variant="outline" className="text-xs py-0"><PawPrint className="h-3 w-3 mr-1" />Pets OK</Badge>
+                        )}
+                        {ride.luggage_size && ride.luggage_size !== 'medium' && (
+                          <Badge variant="outline" className="text-xs py-0"><Briefcase className="h-3 w-3 mr-1" />{ride.luggage_size} luggage</Badge>
+                        )}
+                      </div>
+
+                      {/* Driver + Price row */}
+                      <div className="flex items-center justify-between pt-1 border-t border-border">
                         {ride.driver_profile && (
-                          <div className="flex items-center space-x-2">
-                            <div className="text-right text-sm">
-                              <div className="font-medium">{ride.driver_profile.full_name}</div>
-                              <div className="flex items-center gap-1 justify-end">
-                                <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                                <span>{ride.driver_profile.rating?.toFixed(1) || '5.0'}</span>
-                              </div>
-                            </div>
-                            <Avatar className="h-8 w-8">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <Avatar className="h-8 w-8 shrink-0">
                               <AvatarImage src={ride.driver_profile.avatar_url} />
                               <AvatarFallback className="text-xs">
                                 {ride.driver_profile.full_name?.split(' ').map(n => n[0]).join('') || 'D'}
                               </AvatarFallback>
                             </Avatar>
+                            <div className="text-sm min-w-0">
+                              <div className="font-medium truncate">{ride.driver_profile.full_name}</div>
+                              <div className="flex items-center gap-1 text-muted-foreground">
+                                <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                                <span>{ride.driver_profile.rating?.toFixed(1) || '5.0'}</span>
+                              </div>
+                            </div>
                           </div>
                         )}
-                        <div className="text-right">
+                        <div className="text-right shrink-0">
                           <div className="text-xl font-bold text-primary">€{ride.price_per_seat}</div>
                           <div className="text-xs text-muted-foreground">per seat</div>
                         </div>
