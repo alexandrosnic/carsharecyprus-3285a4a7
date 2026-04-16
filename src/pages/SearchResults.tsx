@@ -1,13 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, Clock, MapPin, Star, Users, Car, Filter, Cigarette, PawPrint, Briefcase, ArrowRight, ChevronRight } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { ArrowLeft, Clock, MapPin, Star, Users, Car, Filter, Cigarette, PawPrint, Briefcase, ArrowRight, ChevronRight, HandHelping } from "lucide-react";
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { getEstimatedDuration, formatDuration } from '@/constants/travelTimes';
+import { toast } from 'sonner';
+import LocationInput from '@/components/LocationInput';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { getEstimatedDuration, formatDuration } from '@/constants/travelTimes';
@@ -41,6 +49,7 @@ interface Ride {
 
 const SearchResults = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [searchParams] = useSearchParams();
   const [rides, setRides] = useState<Ride[]>([]);
   const [loading, setLoading] = useState(true);
@@ -50,6 +59,19 @@ const SearchResults = () => {
   const [priceRange, setPriceRange] = useState({ min: 0, max: 100 });
   const [minSeats, setMinSeats] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
+
+  // Ride request dialog
+  const [requestDialogOpen, setRequestDialogOpen] = useState(false);
+  const [submittingRequest, setSubmittingRequest] = useState(false);
+  const [requestForm, setRequestForm] = useState({
+    departure_city: '',
+    arrival_city: '',
+    desired_date: '',
+    desired_time: '',
+    seats_needed: 1,
+    max_price: '',
+    description: '',
+  });
 
   const departure = searchParams.get('departure') || '';
   const destination = searchParams.get('destination') || '';
