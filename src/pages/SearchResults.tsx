@@ -76,9 +76,54 @@ const SearchResults = () => {
   const time = searchParams.get('time') || '';
   const passengers = parseInt(searchParams.get('passengers') || '1');
 
+  // Pre-fill request form from search params
+  useEffect(() => {
+    setRequestForm(prev => ({
+      ...prev,
+      departure_city: departure,
+      arrival_city: destination,
+      desired_date: date,
+      desired_time: time,
+      seats_needed: passengers,
+    }));
+  }, [departure, destination, date, time, passengers]);
+
   useEffect(() => {
     fetchRides();
   }, [searchParams, sortBy, priceRange, minSeats]);
+
+  const handleSubmitRequest = async () => {
+    if (!user) {
+      toast.error('Please sign in to post a ride request');
+      navigate('/auth');
+      return;
+    }
+    if (!requestForm.departure_city || !requestForm.arrival_city || !requestForm.desired_date) {
+      toast.error('Please fill in departure, destination, and date');
+      return;
+    }
+    setSubmittingRequest(true);
+    try {
+      const { error } = await supabase.from('ride_requests').insert({
+        passenger_id: user.id,
+        departure_city: requestForm.departure_city,
+        arrival_city: requestForm.arrival_city,
+        desired_date: requestForm.desired_date,
+        desired_time: requestForm.desired_time || null,
+        seats_needed: requestForm.seats_needed,
+        max_price: requestForm.max_price ? parseFloat(requestForm.max_price) : null,
+        description: requestForm.description.trim() || null,
+      });
+      if (error) throw error;
+      toast.success('Ride request posted! Drivers will see your request.');
+      setRequestDialogOpen(false);
+    } catch (error: any) {
+      console.error('Error posting ride request:', error);
+      toast.error('Failed to post ride request');
+    } finally {
+      setSubmittingRequest(false);
+    }
+  };
 
   // Extract the core city name from a full address for fuzzy matching
   const extractCity = (location: string): string => {
