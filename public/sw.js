@@ -1,7 +1,6 @@
 // Service Worker for Push Notifications and PWA functionality
-const CACHE_NAME = 'carshare-cyprus-v2';
+const CACHE_NAME = 'carshare-cyprus-v3';
 const STATIC_CACHE_URLS = [
-  '/manifest.json',
   '/offline.html'
 ];
 
@@ -41,8 +40,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  const requestUrl = new URL(event.request.url);
-
+  // Navigation requests: network-first, fallback to offline page
   if (event.request.mode === 'navigate') {
     event.respondWith(
       fetch(event.request).catch(() => caches.match('/offline.html'))
@@ -50,28 +48,8 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  if (requestUrl.origin !== self.location.origin) {
-    return;
-  }
-
-  event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-
-      return fetch(event.request).then((networkResponse) => {
-        if (networkResponse && networkResponse.ok) {
-          const responseClone = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseClone);
-          });
-        }
-
-        return networkResponse;
-      });
-    })
-  );
+  // All other requests: always go to network (no asset caching)
+  // Vite already fingerprints assets for browser caching
 });
 
 self.addEventListener('push', (event) => {
