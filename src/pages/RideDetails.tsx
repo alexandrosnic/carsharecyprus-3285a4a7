@@ -10,6 +10,7 @@ import { Separator } from '@/components/ui/separator';
 import { ArrowLeft, MapPin, Clock, Users, Star, Phone, MessageCircle, Car, DollarSign, Cigarette, PawPrint, Briefcase } from 'lucide-react';
 import { toast } from 'sonner';
 import Map from '@/components/Map';
+import DriverReviews from '@/components/DriverReviews';
 import { getEstimatedDuration, formatDuration } from '@/constants/travelTimes';
 
 interface RideDetails {
@@ -379,6 +380,11 @@ const RideDetails = () => {
                     <p className="text-muted-foreground">{ride.description}</p>
                   </CardContent>
                 </Card>
+              )}
+
+              {/* Driver Reviews */}
+              {ride.driver_profile?.user_id && (
+                <DriverReviews driverId={ride.driver_profile.user_id} />
               )}
 
               {/* Route Map */}

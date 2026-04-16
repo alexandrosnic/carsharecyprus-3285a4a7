@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Plus, Search, User, MapPin, Clock, Star, Users, Cigarette, PawPrint, Briefcase } from 'lucide-react';
+import { Plus, Search, User, MapPin, Clock, Star, Users, Cigarette, PawPrint, Briefcase, HandHelping } from 'lucide-react';
 import { BRAND_LOGO } from '@/constants/brand';
 import { NotificationCenter } from '@/components/notifications/NotificationCenter';
 import { getEstimatedDuration, formatDuration } from '@/constants/travelTimes';
@@ -140,18 +140,24 @@ const Index = () => {
         </div>
 
         {/* Action Cards */}
-        <div className="grid md:grid-cols-2 gap-8 mb-12">
+        <div className="grid md:grid-cols-3 gap-6 mb-12">
           <div className="bg-card rounded-lg shadow-lg p-8 text-center hover:shadow-xl transition-shadow">
-            <Plus className="h-16 w-16 text-primary mx-auto mb-4" />
-            <h3 className="text-2xl font-bold mb-4 text-foreground">Offer a Ride</h3>
-            <p className="text-muted-foreground mb-6">Share your journey and earn money while helping others</p>
+            <Plus className="h-14 w-14 text-primary mx-auto mb-4" />
+            <h3 className="text-xl font-bold mb-3 text-foreground">Offer a Ride</h3>
+            <p className="text-muted-foreground mb-6 text-sm">Share your journey and earn money</p>
             <Button size="lg" className="w-full" onClick={() => navigate('/register-ride')}>Create Ride</Button>
           </div>
           <div className="bg-card rounded-lg shadow-lg p-8 text-center hover:shadow-xl transition-shadow">
-            <Search className="h-16 w-16 text-primary mx-auto mb-4" />
-            <h3 className="text-2xl font-bold mb-4 text-foreground">Find a Ride</h3>
-            <p className="text-muted-foreground mb-6">Search for rides to your destination at great prices</p>
+            <Search className="h-14 w-14 text-primary mx-auto mb-4" />
+            <h3 className="text-xl font-bold mb-3 text-foreground">Find a Ride</h3>
+            <p className="text-muted-foreground mb-6 text-sm">Search for rides at great prices</p>
             <Button size="lg" variant="outline" className="w-full" onClick={() => navigate('/find-ride')}>Search Rides</Button>
+          </div>
+          <div className="bg-card rounded-lg shadow-lg p-8 text-center hover:shadow-xl transition-shadow">
+            <HandHelping className="h-14 w-14 text-primary mx-auto mb-4" />
+            <h3 className="text-xl font-bold mb-3 text-foreground">Request a Ride</h3>
+            <p className="text-muted-foreground mb-6 text-sm">Post what ride you need</p>
+            <Button size="lg" variant="outline" className="w-full" onClick={() => navigate('/ride-requests')}>Browse Requests</Button>
           </div>
         </div>
 
