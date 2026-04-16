@@ -66,7 +66,7 @@ const UserReviews = ({ userId, label = 'Reviews' }: UserReviewsProps) => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <MessageSquare className="h-5 w-5" />
-          Driver Reviews ({reviews.length})
+          {label} ({reviews.length})
         </CardTitle>
       </CardHeader>
       <CardContent>
