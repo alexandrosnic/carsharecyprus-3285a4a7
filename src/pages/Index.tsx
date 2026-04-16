@@ -118,10 +118,10 @@ const Index = () => {
       <header className="bg-card shadow-sm border-b border-border">
         <div className="max-w-6xl mx-auto px-4 py-3">
           <div className="flex items-center justify-center gap-2 mb-2">
-            <img src="/lovable-uploads/834c900c-913f-46a2-b82c-ee88234635ae.png" alt="Car Share Cyprus Logo" className="h-8" />
-            <h1 className="text-xl font-bold text-foreground whitespace-nowrap">Car Share Cyprus</h1>
+            <img src="/lovable-uploads/834c900c-913f-46a2-b82c-ee88234635ae.png" alt="Car Share Cyprus Logo" className="h-10" />
+            <h1 className="text-2xl font-bold text-foreground whitespace-nowrap">Car Share Cyprus</h1>
           </div>
-          <div className="flex items-center justify-center flex-wrap gap-2">
+          <div className="flex items-center justify-end flex-wrap gap-2">
             <NotificationCenter />
             <Button variant="ghost" size="sm" className="text-xs px-2" onClick={() => navigate('/profile')}>
               <User className="h-4 w-4 mr-1" />
