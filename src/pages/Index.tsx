@@ -116,18 +116,18 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <header className="bg-card shadow-sm border-b border-border">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
+        <div className="max-w-6xl mx-auto px-4 py-3">
+          <div className="flex items-center justify-center gap-2 mb-2">
             <img src="/lovable-uploads/834c900c-913f-46a2-b82c-ee88234635ae.png" alt="Car Share Cyprus Logo" className="h-8" />
-            <h1 className="text-2xl font-bold text-foreground">Car Share Cyprus</h1>
+            <h1 className="text-xl font-bold text-foreground whitespace-nowrap">Car Share Cyprus</h1>
           </div>
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center justify-center flex-wrap gap-2">
             <NotificationCenter />
-            <Button variant="ghost" size="sm" onClick={() => navigate('/profile')}>
-              <User className="h-4 w-4 mr-2" />
-              {user.email}
+            <Button variant="ghost" size="sm" className="text-xs px-2" onClick={() => navigate('/profile')}>
+              <User className="h-4 w-4 mr-1" />
+              <span className="truncate max-w-[120px]">{user.email}</span>
             </Button>
-            <Button variant="outline" size="sm" onClick={() => signOut()}>
+            <Button variant="outline" size="sm" className="text-xs px-3 whitespace-nowrap" onClick={() => signOut()}>
               Sign Out
             </Button>
           </div>
