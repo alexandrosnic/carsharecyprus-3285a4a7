@@ -336,15 +336,15 @@ const Profile = () => {
                   <div className="flex items-center justify-between">
                     <Label htmlFor="phone_number">Phone Number</Label>
                     {profileData.phone_number && (
-                      (profileData as any).phone_verified ? (
-                        <span className="inline-flex items-center gap-1 text-xs text-green-500">
+                      profileData.phone_verified ? (
+                        <span className="inline-flex items-center gap-1 text-xs text-primary">
                           <CheckCircle2 className="h-3.5 w-3.5" /> Verified
                         </span>
                       ) : (
                         <button
                           type="button"
                           onClick={() => navigate('/verify-phone?next=/profile')}
-                          className="inline-flex items-center gap-1 text-xs text-amber-500 hover:underline"
+                          className="inline-flex items-center gap-1 text-xs text-destructive hover:underline"
                         >
                           <AlertTriangle className="h-3.5 w-3.5" /> Verify now
                         </button>
