@@ -24,6 +24,8 @@ interface Trip {
   booking_status?: string;
   seats_booked?: number;
   total_amount?: number;
+  payout_status?: string;
+  passenger_confirmed_at?: string | null;
   other_party?: {
     full_name: string;
     avatar_url: string;
@@ -156,6 +158,8 @@ const MyTrips = () => {
           booking_status: booking.status,
           seats_booked: booking.seats_booked,
           total_amount: booking.total_amount,
+          payout_status: (booking as any).payout_status,
+          passenger_confirmed_at: (booking as any).passenger_confirmed_at,
           other_party: driver ? {
             full_name: driver.full_name,
             avatar_url: driver.avatar_url,
@@ -245,6 +249,22 @@ const MyTrips = () => {
     } catch (error: any) {
       console.error('Error cancelling booking:', error);
       toast.error('Failed to cancel booking');
+    }
+  };
+
+  const handleConfirmArrival = async (bookingId: string) => {
+    if (!confirm('Confirm you have safely arrived? This will release payment to the driver.')) return;
+    try {
+      const { data, error } = await supabase.functions.invoke('release-funds', {
+        body: { booking_id: bookingId },
+      });
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+      toast.success('Thanks! Payment has been released to the driver.');
+      fetchTrips();
+    } catch (error: any) {
+      console.error('Error releasing funds:', error);
+      toast.error('Failed to confirm arrival: ' + error.message);
     }
   };
 
@@ -487,15 +507,49 @@ const MyTrips = () => {
                           </div>
                         )}
                         {trip.type === 'passenger' && (trip.booking_status === 'pending' || trip.booking_status === 'confirmed') && (
-                          <div className="mt-4 pt-4 border-t">
-                            <Button
-                              size="sm"
-                              variant="destructive"
-                              onClick={() => handleCancelBooking(trip.id)}
-                            >
-                              <Ban className="h-4 w-4 mr-1" />
-                              Cancel Booking
-                            </Button>
+                          <div className="mt-4 pt-4 border-t space-y-3">
+                            {/* Escrow status indicator */}
+                            {trip.payout_status === 'held' && (
+                              <div className="text-xs text-muted-foreground flex items-center gap-2">
+                                <span className="inline-block h-2 w-2 rounded-full bg-yellow-500" />
+                                Payment held in escrow — released to driver after the ride
+                              </div>
+                            )}
+                            {trip.payout_status === 'frozen' && (
+                              <div className="text-xs text-destructive flex items-center gap-2">
+                                <AlertCircle className="h-3 w-3" />
+                                Payment frozen — dispute under review
+                              </div>
+                            )}
+
+                            <div className="flex flex-wrap gap-2">
+                              {/* "I arrived" button: only for confirmed bookings, after departure, while held */}
+                              {trip.booking_status === 'confirmed'
+                                && trip.payout_status === 'held'
+                                && new Date(trip.departure_time) <= new Date()
+                                && !trip.passenger_confirmed_at && (
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleConfirmArrival(trip.id)}
+                                >
+                                  <CheckCircle className="h-4 w-4 mr-1" />
+                                  I arrived — release payment
+                                </Button>
+                              )}
+                              {trip.passenger_confirmed_at && trip.payout_status === 'released' && (
+                                <Badge variant="outline" className="text-green-600 border-green-600">
+                                  Payment released
+                                </Badge>
+                              )}
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => handleCancelBooking(trip.id)}
+                              >
+                                <Ban className="h-4 w-4 mr-1" />
+                                Cancel Booking
+                              </Button>
+                            </div>
                           </div>
                         )}
                       </CardContent>
