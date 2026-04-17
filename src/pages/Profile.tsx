@@ -498,6 +498,27 @@ const Profile = () => {
             verified={!!profileData.id_verified}
           />
 
+          {/* My Trips Quick Access */}
+          <Card
+            className="cursor-pointer hover:bg-accent/40 transition-colors"
+            onClick={() => navigate('/my-trips')}
+          >
+            <CardContent className="flex items-center justify-between p-6">
+              <div className="flex items-center gap-4">
+                <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Car className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-base">My Trips</h3>
+                  <p className="text-sm text-muted-foreground">
+                    View your bookings and posted rides
+                  </p>
+                </div>
+              </div>
+              <ChevronRight className="h-5 w-5 text-muted-foreground" />
+            </CardContent>
+          </Card>
+
           {/* Ride Statistics */}
           <Card>
             <CardHeader>
