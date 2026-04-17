@@ -16,6 +16,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { getEstimatedDuration, formatDuration } from '@/constants/travelTimes';
 import { toast } from 'sonner';
 import LocationInput from '@/components/LocationInput';
+import VerifiedBadge from '@/components/VerifiedBadge';
 
 interface Ride {
   id: string;
