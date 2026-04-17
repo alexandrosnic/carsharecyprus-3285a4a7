@@ -23,6 +23,7 @@ interface ProfileData {
   total_rides: number;
   stripe_account_id?: string;
   stripe_onboarding_complete?: boolean;
+  phone_verified?: boolean;
 }
 
 interface Review {
@@ -127,6 +128,7 @@ const Profile = () => {
           total_rides: data.total_rides || 0,
           stripe_account_id: (data as any).stripe_account_id || undefined,
           stripe_onboarding_complete: (data as any).stripe_onboarding_complete || false,
+          phone_verified: (data as any).phone_verified || false,
         });
       }
     } catch (error: any) {
