@@ -8,7 +8,9 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Eye, EyeOff, Mail, Lock, User, Car, Chrome } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 
 const Auth = () => {
@@ -263,7 +265,27 @@ const Auth = () => {
                     />
                   </div>
                 </div>
-                <Button type="submit" className="w-full" disabled={loading}>
+                <div className="flex items-start gap-2 pt-1">
+                  <Checkbox
+                    id="accept-terms"
+                    checked={acceptedTerms}
+                    onCheckedChange={(v) => setAcceptedTerms(v === true)}
+                    className="mt-0.5"
+                  />
+                  <Label htmlFor="accept-terms" className="text-xs leading-snug font-normal cursor-pointer">
+                    I have read and agree to the{' '}
+                    <Link to="/terms" target="_blank" className="underline text-primary hover:text-primary/80">
+                      Terms of Service
+                    </Link>
+                    , including the{' '}
+                    <strong>24-hour dispute window</strong> for completed rides, and the{' '}
+                    <Link to="/privacy" target="_blank" className="underline text-primary hover:text-primary/80">
+                      Privacy Policy
+                    </Link>
+                    .
+                  </Label>
+                </div>
+                <Button type="submit" className="w-full" disabled={loading || !acceptedTerms}>
                   {loading ? 'Creating account...' : 'Sign Up'}
                 </Button>
               </form>
@@ -272,7 +294,10 @@ const Auth = () => {
 
           <div className="mt-6 text-center">
             <p className="text-xs text-muted-foreground">
-              By signing up, you agree to our Terms of Service and Privacy Policy
+              By signing in, you agree to our{' '}
+              <Link to="/terms" className="underline hover:text-foreground">Terms of Service</Link>
+              {' '}and{' '}
+              <Link to="/privacy" className="underline hover:text-foreground">Privacy Policy</Link>.
             </p>
           </div>
         </CardContent>
