@@ -12,6 +12,8 @@ import { ArrowLeft, Camera, Star, User, Phone, Mail, Save, Shield, Loader2, Mess
 import { BRAND_LOGO } from '@/constants/brand';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import VerifiedBadgeCard from '@/components/VerifiedBadgeCard';
+import VerifiedBadge from '@/components/VerifiedBadge';
 
 interface ProfileData {
   id?: string;
@@ -24,6 +26,8 @@ interface ProfileData {
   stripe_account_id?: string;
   stripe_onboarding_complete?: boolean;
   phone_verified?: boolean;
+  id_verified?: boolean;
+  id_verification_status?: string;
 }
 
 interface Review {
@@ -129,6 +133,8 @@ const Profile = () => {
           stripe_account_id: (data as any).stripe_account_id || undefined,
           stripe_onboarding_complete: (data as any).stripe_onboarding_complete || false,
           phone_verified: (data as any).phone_verified || false,
+          id_verified: (data as any).id_verified || false,
+          id_verification_status: (data as any).id_verification_status || 'none',
         });
       }
     } catch (error: any) {
@@ -485,6 +491,12 @@ const Profile = () => {
               </div>
             </CardContent>
           </Card>
+
+          {/* Verified Badge - Stripe Identity */}
+          <VerifiedBadgeCard
+            status={profileData.id_verification_status || 'none'}
+            verified={!!profileData.id_verified}
+          />
 
           {/* Ride Statistics */}
           <Card>

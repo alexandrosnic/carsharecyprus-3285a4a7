@@ -27,6 +27,7 @@ import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import AdminDisputes from "./pages/AdminDisputes";
 import VerifyPhone from "./pages/VerifyPhone";
+import VerificationSuccess from "./pages/VerificationSuccess";
 import NotFound from "./pages/NotFound";
 import EmailConfirmBanner from "@/components/EmailConfirmBanner";
 
@@ -63,6 +64,7 @@ const App = () => (
                 <Route path="/terms" element={<Terms />} />
                 <Route path="/admin/disputes" element={<AdminDisputes />} />
                 <Route path="/verify-phone" element={<VerifyPhone />} />
+                <Route path="/verification-success" element={<VerificationSuccess />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
