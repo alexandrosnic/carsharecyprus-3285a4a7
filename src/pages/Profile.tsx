@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { ArrowLeft, Camera, Star, User, Phone, Mail, Save, Shield, Loader2, MessageSquare, Banknote, ExternalLink, Cake, LogOut } from 'lucide-react';
+import { ArrowLeft, Camera, Star, User, Phone, Mail, Save, Shield, Loader2, MessageSquare, Banknote, ExternalLink, Cake, LogOut, CheckCircle2, AlertTriangle } from 'lucide-react';
 import { BRAND_LOGO } from '@/constants/brand';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -331,7 +331,24 @@ const Profile = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="phone_number">Phone Number</Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="phone_number">Phone Number</Label>
+                    {profileData.phone_number && (
+                      (profileData as any).phone_verified ? (
+                        <span className="inline-flex items-center gap-1 text-xs text-green-500">
+                          <CheckCircle2 className="h-3.5 w-3.5" /> Verified
+                        </span>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => navigate('/verify-phone?next=/profile')}
+                          className="inline-flex items-center gap-1 text-xs text-amber-500 hover:underline"
+                        >
+                          <AlertTriangle className="h-3.5 w-3.5" /> Verify now
+                        </button>
+                      )
+                    )}
+                  </div>
                   <div className="relative">
                     <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
