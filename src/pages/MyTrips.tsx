@@ -158,6 +158,8 @@ const MyTrips = () => {
           booking_status: booking.status,
           seats_booked: booking.seats_booked,
           total_amount: booking.total_amount,
+          payout_status: (booking as any).payout_status,
+          passenger_confirmed_at: (booking as any).passenger_confirmed_at,
           other_party: driver ? {
             full_name: driver.full_name,
             avatar_url: driver.avatar_url,
@@ -247,6 +249,22 @@ const MyTrips = () => {
     } catch (error: any) {
       console.error('Error cancelling booking:', error);
       toast.error('Failed to cancel booking');
+    }
+  };
+
+  const handleConfirmArrival = async (bookingId: string) => {
+    if (!confirm('Confirm you have safely arrived? This will release payment to the driver.')) return;
+    try {
+      const { data, error } = await supabase.functions.invoke('release-funds', {
+        body: { booking_id: bookingId },
+      });
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+      toast.success('Thanks! Payment has been released to the driver.');
+      fetchTrips();
+    } catch (error: any) {
+      console.error('Error releasing funds:', error);
+      toast.error('Failed to confirm arrival: ' + error.message);
     }
   };
 
