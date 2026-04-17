@@ -36,6 +36,7 @@ interface RideFormData {
   recurrence_pattern: string;
   recurrence_end_date: string;
   custom_days: number[]; // 0=Sun, 1=Mon, ..., 6=Sat
+  legal_declaration: boolean;
 }
 
 interface StopData {
@@ -74,6 +75,7 @@ const RegisterRide = () => {
     recurrence_pattern: '',
     recurrence_end_date: '',
     custom_days: [],
+    legal_declaration: false,
   });
 
   const handleInputChange = (field: keyof RideFormData, value: string | number | boolean | number[]) => {
@@ -141,6 +143,10 @@ const RegisterRide = () => {
     if (formData.return_ride && !formData.return_time) { toast.error('Please select a return time'); return; }
     if (formData.is_recurring && formData.recurrence_pattern === 'custom' && formData.custom_days.length === 0) {
       toast.error('Please select at least one day for custom recurrence'); return;
+    }
+    if (!formData.legal_declaration) {
+      toast.error('Please confirm the driver legal declaration before publishing');
+      return;
     }
 
     setLoading(true);
@@ -792,11 +798,29 @@ const RegisterRide = () => {
             </CardContent>
           </Card>
 
+          {/* Legal Declaration */}
+          <Card className="border-primary/30">
+            <CardContent className="pt-6">
+              <div className="flex items-start gap-3">
+                <Checkbox
+                  id="legal_declaration"
+                  checked={formData.legal_declaration}
+                  onCheckedChange={(checked) => handleInputChange('legal_declaration', checked as boolean)}
+                  className="mt-1"
+                />
+                <Label htmlFor="legal_declaration" className="text-sm font-normal leading-relaxed cursor-pointer">
+                  <span className="font-semibold">Driver declaration (required):</span>{' '}
+                  I certify that I hold a valid Category B driving license and that my vehicle is covered by a valid insurance policy that allows for non-profit carpooling.
+                </Label>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Submit */}
           <Card>
             <CardContent className="pt-6">
               <div className="flex flex-col space-y-4">
-                <Button type="submit" size="lg" disabled={loading} className="w-full">
+                <Button type="submit" size="lg" disabled={loading || !formData.legal_declaration} className="w-full">
                   <Plus className="h-4 w-4 mr-2" />
                   {loading ? 'Creating Ride...' : 'Create Ride'}
                 </Button>
