@@ -15,6 +15,8 @@ import { toast } from 'sonner';
 import { getEstimatedDuration, formatDuration, getEstimatedDistanceKm, getMaxPricePerSeat, MAX_PRICE_PER_KM } from '@/constants/travelTimes';
 import LocationInput, { LocationResult } from '@/components/LocationInput';
 import ClickableMap, { MapMarkerData } from '@/components/ClickableMap';
+import { usePhoneVerification } from '@/hooks/usePhoneVerification';
+import PhoneVerificationGate from '@/components/PhoneVerificationGate';
 
 interface RideFormData {
   departure_city: string;
@@ -52,6 +54,8 @@ const RegisterRide = () => {
   const [arrivalCoords, setArrivalCoords] = useState<[number, number] | null>(null);
   const [mapSelectMode, setMapSelectMode] = useState<string | null>(null);
   const [stopCoords, setStopCoords] = useState<Array<[number, number] | null>>([]);
+  const { phoneVerified, loading: phoneLoading } = usePhoneVerification();
+  const [showPhoneGate, setShowPhoneGate] = useState(false);
   const [formData, setFormData] = useState<RideFormData>({
     departure_city: '',
     arrival_city: '',
@@ -125,6 +129,7 @@ const RegisterRide = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) { toast.error('You must be logged in to create a ride'); return; }
+    if (!phoneVerified && !phoneLoading) { setShowPhoneGate(true); return; }
     if (!formData.departure_city || !formData.arrival_city) { toast.error('Please select departure and destination'); return; }
     if (!formData.departure_time) { toast.error('Please select departure date and time'); return; }
     if (!formData.price_per_seat || parseFloat(formData.price_per_seat) <= 0) { toast.error('Please enter a valid price per seat'); return; }
