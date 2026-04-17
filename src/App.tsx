@@ -26,7 +26,9 @@ import RideRequests from "./pages/RideRequests";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import AdminDisputes from "./pages/AdminDisputes";
+import VerifyPhone from "./pages/VerifyPhone";
 import NotFound from "./pages/NotFound";
+import EmailConfirmBanner from "@/components/EmailConfirmBanner";
 
 const queryClient = new QueryClient();
 
@@ -38,6 +40,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
+            <EmailConfirmBanner />
             <Suspense fallback={<LoadingFallback fullScreen message="Loading application..." />}>
               <Routes>
                 <Route path="/" element={<Index />} />
@@ -59,6 +62,7 @@ const App = () => (
                 <Route path="/privacy" element={<Privacy />} />
                 <Route path="/terms" element={<Terms />} />
                 <Route path="/admin/disputes" element={<AdminDisputes />} />
+                <Route path="/verify-phone" element={<VerifyPhone />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
