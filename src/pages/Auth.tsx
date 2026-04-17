@@ -28,6 +28,7 @@ const Auth = () => {
     confirmPassword: '',
     fullName: '',
   });
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   const handleGoogleSignIn = async () => {
     const { error } = await supabase.auth.signInWithOAuth({
@@ -68,6 +69,11 @@ const Auth = () => {
 
     if (signUpData.password.length < 6) {
       toast.error('Password must be at least 6 characters');
+      return;
+    }
+
+    if (!acceptedTerms) {
+      toast.error('You must accept the Terms of Service to create an account');
       return;
     }
 
