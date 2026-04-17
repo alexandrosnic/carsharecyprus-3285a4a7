@@ -541,6 +541,21 @@ const MyTrips = () => {
                                   Payment released
                                 </Badge>
                               )}
+                              {/* Report a Problem: confirmed bookings, before payout released, within 24h after departure */}
+                              {trip.booking_status === 'confirmed'
+                                && trip.payout_status !== 'released'
+                                && new Date(trip.departure_time) <= new Date()
+                                && (Date.now() - new Date(trip.departure_time).getTime()) < 24 * 60 * 60 * 1000 && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="border-destructive/50 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                                  onClick={() => navigate(`/dispute?bookingId=${trip.id}`)}
+                                >
+                                  <AlertCircle className="h-4 w-4 mr-1" />
+                                  Report a Problem
+                                </Button>
+                              )}
                               <Button
                                 size="sm"
                                 variant="destructive"

@@ -24,6 +24,7 @@ import DriverVerification from "./pages/DriverVerification";
 import DisputeResolution from "./pages/DisputeResolution";
 import RideRequests from "./pages/RideRequests";
 import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
 import AdminDisputes from "./pages/AdminDisputes";
 import NotFound from "./pages/NotFound";
 
@@ -56,6 +57,7 @@ const App = () => (
                 <Route path="/dispute" element={<DisputeResolution />} />
                 <Route path="/ride-requests" element={<RideRequests />} />
                 <Route path="/privacy" element={<Privacy />} />
+                <Route path="/terms" element={<Terms />} />
                 <Route path="/admin/disputes" element={<AdminDisputes />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
