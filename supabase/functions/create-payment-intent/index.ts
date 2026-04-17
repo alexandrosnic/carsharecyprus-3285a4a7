@@ -75,16 +75,10 @@ serve(async (req) => {
       apiVersion: '2023-10-16',
     })
 
-    // Check if driver has a connected Stripe account
-    const { data: driverProfile } = await supabaseClient
-      .from('profiles')
-      .select('stripe_account_id, stripe_onboarding_complete')
-      .eq('user_id', ride.driver_id)
-      .single()
-
-    const hasConnectedAccount = driverProfile?.stripe_account_id && driverProfile?.stripe_onboarding_complete
-
-    // Build checkout session params
+    // ESCROW MODEL: Funds are charged to the platform Stripe balance and held there.
+    // They are only transferred to the driver after the ride is confirmed completed
+    // (via passenger "I arrived" tap or 24h auto-release after scheduled arrival).
+    // This is handled by the `release-funds` and `auto-release-funds` edge functions.
     const sessionParams: any = {
       payment_method_types: ['card'],
       line_items: [
@@ -113,18 +107,7 @@ serve(async (req) => {
       },
     }
 
-    // If driver has Stripe Connect, auto-split the payment
-    if (hasConnectedAccount) {
-      sessionParams.payment_intent_data = {
-        application_fee_amount: commissionAmount, // Platform keeps 10%
-        transfer_data: {
-          destination: driverProfile.stripe_account_id, // 90% goes to driver
-        },
-      }
-      console.log('Using Stripe Connect transfer to:', driverProfile.stripe_account_id)
-    } else {
-      console.log('Driver has no Connect account, payment goes to platform')
-    }
+    console.log('Escrow checkout: funds will be held on platform until ride confirmation')
 
     // Create Stripe checkout session
     const session = await stripe.checkout.sessions.create(sessionParams)
