@@ -12,7 +12,6 @@ import { toast } from 'sonner';
 import { validateEUPhone, normalizePhone } from '@/lib/phoneValidation';
 
 const RESEND_COOLDOWN_SECONDS = 60;
-const MAX_SENDS_PER_HOUR = 3;
 
 const VerifyPhone: React.FC = () => {
   const navigate = useNavigate();
