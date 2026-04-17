@@ -32,6 +32,7 @@ interface RideDetails {
     full_name: string;
     avatar_url: string;
     rating: number;
+    id_verified?: boolean;
     total_rides: number;
     phone_number?: string;
   };
@@ -69,7 +70,7 @@ const RideDetails = () => {
       // Then get the driver profile (using public view)
       const { data: profileData, error: profileError } = await supabase
         .from('safe_profiles')
-        .select('user_id, full_name, avatar_url, rating, total_rides')
+        .select('user_id, full_name, avatar_url, rating, total_rides, id_verified')
         .eq('user_id', rideData.driver_id)
         .single();
 
@@ -330,7 +331,10 @@ const RideDetails = () => {
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1">
-                      <h3 className="text-xl font-semibold">{ride.driver_profile?.full_name || 'Unknown Driver'}</h3>
+                      <h3 className="text-xl font-semibold flex items-center gap-2">
+                        {ride.driver_profile?.full_name || 'Unknown Driver'}
+                        <VerifiedBadge verified={ride.driver_profile?.id_verified} size="md" />
+                      </h3>
                       <div className="flex items-center space-x-4 mt-1">
                         <div className="flex items-center space-x-1">
                           <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
