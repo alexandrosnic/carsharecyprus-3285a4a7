@@ -11,6 +11,8 @@ import { Separator } from '@/components/ui/separator';
 import { ArrowLeft, MapPin, Clock, Users, DollarSign, CreditCard, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import { useNotifications } from '@/hooks/useNotifications';
+import { usePhoneVerification } from '@/hooks/usePhoneVerification';
+import PhoneVerificationGate from '@/components/PhoneVerificationGate';
 import Map from '@/components/Map';
 
 interface RideBookingData {
@@ -31,10 +33,12 @@ const BookRide = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { showWaitingForDriverNotification } = useNotifications();
+  const { phoneVerified, loading: phoneLoading } = usePhoneVerification();
   const [ride, setRide] = useState<RideBookingData | null>(null);
   const [loading, setLoading] = useState(true);
   const [booking, setBooking] = useState(false);
   const [seatsToBook, setSeatsToBook] = useState(1);
+  const [showPhoneGate, setShowPhoneGate] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -108,6 +112,11 @@ const BookRide = () => {
 
   const handleBooking = async () => {
     if (!user || !ride) return;
+
+    if (!phoneVerified && !phoneLoading) {
+      setShowPhoneGate(true);
+      return;
+    }
 
     if (seatsToBook > ride.available_seats) {
       toast.error('Not enough seats available');
@@ -220,6 +229,12 @@ const BookRide = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <PhoneVerificationGate
+        open={showPhoneGate}
+        onOpenChange={setShowPhoneGate}
+        nextPath={`/book-ride/${ride.id}`}
+        action="book this ride"
+      />
       {/* Header */}
       <header className="bg-card shadow-sm border-b border-border">
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">

@@ -252,6 +252,27 @@ export type Database = {
         }
         Relationships: []
       }
+      phone_otp_attempts: {
+        Row: {
+          created_at: string
+          id: string
+          phone_number: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          phone_number: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          phone_number?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -260,6 +281,8 @@ export type Database = {
           full_name: string
           id: string
           phone_number: string | null
+          phone_verified: boolean
+          phone_verified_at: string | null
           rating: number | null
           stripe_account_id: string | null
           stripe_onboarding_complete: boolean | null
@@ -274,6 +297,8 @@ export type Database = {
           full_name: string
           id?: string
           phone_number?: string | null
+          phone_verified?: boolean
+          phone_verified_at?: string | null
           rating?: number | null
           stripe_account_id?: string | null
           stripe_onboarding_complete?: boolean | null
@@ -288,6 +313,8 @@ export type Database = {
           full_name?: string
           id?: string
           phone_number?: string | null
+          phone_verified?: boolean
+          phone_verified_at?: string | null
           rating?: number | null
           stripe_account_id?: string | null
           stripe_onboarding_complete?: boolean | null
