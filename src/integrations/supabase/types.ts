@@ -97,6 +97,7 @@ export type Database = {
           id: string
           resolution: string | null
           resolved_at: string | null
+          resolved_by: string | null
           respondent_id: string
           status: string | null
           updated_at: string
@@ -112,6 +113,7 @@ export type Database = {
           id?: string
           resolution?: string | null
           resolved_at?: string | null
+          resolved_by?: string | null
           respondent_id: string
           status?: string | null
           updated_at?: string
@@ -127,6 +129,7 @@ export type Database = {
           id?: string
           resolution?: string | null
           resolved_at?: string | null
+          resolved_by?: string | null
           respondent_id?: string
           status?: string | null
           updated_at?: string
