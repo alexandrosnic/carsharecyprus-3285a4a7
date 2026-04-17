@@ -253,7 +253,7 @@ const DriverVerification = () => {
                       className="mt-1"
                     />
                     <Label htmlFor="insurance_covers_passengers" className="text-sm leading-relaxed cursor-pointer">
-                      My insurance covers passengers and I will not seek to make a profit from these trips.
+                      I certify that I hold a valid Category B driving licence, that my vehicle is covered by a valid insurance policy that allows for non-profit carpooling, and that I will not seek to make a profit from these trips.
                     </Label>
                   </div>
                 </div>
