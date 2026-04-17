@@ -222,6 +222,45 @@ export type Database = {
         }
         Relationships: []
       }
+      id_verification_reviews: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          failure_reason: string | null
+          id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          stripe_identity_session_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          failure_reason?: string | null
+          id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          stripe_identity_session_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          failure_reason?: string | null
+          id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          stripe_identity_session_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           created_at: string
@@ -313,12 +352,18 @@ export type Database = {
           date_of_birth: string | null
           full_name: string
           id: string
+          id_verification_paid_at: string | null
+          id_verification_status: string
+          id_verified: boolean
+          id_verified_at: string | null
           phone_number: string | null
           phone_verified: boolean
           phone_verified_at: string | null
           rating: number | null
           stripe_account_id: string | null
+          stripe_identity_session_id: string | null
           stripe_onboarding_complete: boolean | null
+          stripe_verification_payment_intent_id: string | null
           total_rides: number | null
           updated_at: string
           user_id: string
@@ -329,12 +374,18 @@ export type Database = {
           date_of_birth?: string | null
           full_name: string
           id?: string
+          id_verification_paid_at?: string | null
+          id_verification_status?: string
+          id_verified?: boolean
+          id_verified_at?: string | null
           phone_number?: string | null
           phone_verified?: boolean
           phone_verified_at?: string | null
           rating?: number | null
           stripe_account_id?: string | null
+          stripe_identity_session_id?: string | null
           stripe_onboarding_complete?: boolean | null
+          stripe_verification_payment_intent_id?: string | null
           total_rides?: number | null
           updated_at?: string
           user_id: string
@@ -345,12 +396,18 @@ export type Database = {
           date_of_birth?: string | null
           full_name?: string
           id?: string
+          id_verification_paid_at?: string | null
+          id_verification_status?: string
+          id_verified?: boolean
+          id_verified_at?: string | null
           phone_number?: string | null
           phone_verified?: boolean
           phone_verified_at?: string | null
           rating?: number | null
           stripe_account_id?: string | null
+          stripe_identity_session_id?: string | null
           stripe_onboarding_complete?: boolean | null
+          stripe_verification_payment_intent_id?: string | null
           total_rides?: number | null
           updated_at?: string
           user_id?: string
@@ -613,6 +670,7 @@ export type Database = {
           created_at: string | null
           full_name: string | null
           id: string | null
+          id_verified: boolean | null
           rating: number | null
           total_rides: number | null
           user_id: string | null
@@ -622,6 +680,7 @@ export type Database = {
           created_at?: string | null
           full_name?: string | null
           id?: string | null
+          id_verified?: boolean | null
           rating?: number | null
           total_rides?: number | null
           user_id?: string | null
@@ -631,6 +690,7 @@ export type Database = {
           created_at?: string | null
           full_name?: string | null
           id?: string | null
+          id_verified?: boolean | null
           rating?: number | null
           total_rides?: number | null
           user_id?: string | null
@@ -643,6 +703,7 @@ export type Database = {
           created_at: string | null
           full_name: string | null
           id: string | null
+          id_verified: boolean | null
           rating: number | null
           total_rides: number | null
           user_id: string | null
@@ -652,6 +713,7 @@ export type Database = {
           created_at?: string | null
           full_name?: string | null
           id?: string | null
+          id_verified?: boolean | null
           rating?: number | null
           total_rides?: number | null
           user_id?: string | null
@@ -661,6 +723,7 @@ export type Database = {
           created_at?: string | null
           full_name?: string | null
           id?: string | null
+          id_verified?: boolean | null
           rating?: number | null
           total_rides?: number | null
           user_id?: string | null
