@@ -38,6 +38,7 @@ interface Ride {
     full_name: string;
     avatar_url: string;
     rating: number;
+    id_verified?: boolean;
     total_rides: number;
   };
   // computed
@@ -195,7 +196,7 @@ const SearchResults = () => {
         const driverIds = [...new Set(processedRides.map(ride => ride.driver_id))];
         const { data: profiles } = await supabase
           .from('safe_profiles')
-          .select('user_id, full_name, avatar_url, rating, total_rides')
+          .select('user_id, full_name, avatar_url, rating, total_rides, id_verified')
           .in('user_id', driverIds);
 
         processedRides = processedRides.map(ride => ({
@@ -469,8 +470,9 @@ const SearchResults = () => {
 
                         <div className="flex items-center gap-2">
                           <div className="text-right">
-                            <div className="text-sm font-medium truncate max-w-[120px]">
+                            <div className="text-sm font-medium truncate max-w-[120px] flex items-center justify-end gap-1">
                               {ride.driver_profile?.full_name || 'Driver'}
+                              <VerifiedBadge verified={ride.driver_profile?.id_verified} size="sm" />
                             </div>
                             <div className="flex items-center justify-end gap-1 text-xs text-muted-foreground">
                               <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />

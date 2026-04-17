@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import Map from '@/components/Map';
 import UserReviews from '@/components/UserReviews';
 import { getEstimatedDuration, formatDuration } from '@/constants/travelTimes';
+import VerifiedBadge from '@/components/VerifiedBadge';
 
 interface RideDetails {
   id: string;
