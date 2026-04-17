@@ -508,6 +508,7 @@ export type Database = {
           departure_city: string
           departure_time: string
           description: string | null
+          driver_certification_accepted_at: string | null
           driver_id: string
           id: string
           is_recurring: boolean | null
@@ -529,6 +530,7 @@ export type Database = {
           departure_city: string
           departure_time: string
           description?: string | null
+          driver_certification_accepted_at?: string | null
           driver_id: string
           id?: string
           is_recurring?: boolean | null
@@ -550,6 +552,7 @@ export type Database = {
           departure_city?: string
           departure_time?: string
           description?: string | null
+          driver_certification_accepted_at?: string | null
           driver_id?: string
           id?: string
           is_recurring?: boolean | null

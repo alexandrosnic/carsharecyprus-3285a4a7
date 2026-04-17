@@ -126,6 +126,7 @@ const RegisterRide = () => {
     luggage_size: formData.luggage_size || 'medium',
     is_recurring: false,
     recurrence_pattern: null as string | null,
+    driver_certification_accepted_at: new Date().toISOString(),
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
