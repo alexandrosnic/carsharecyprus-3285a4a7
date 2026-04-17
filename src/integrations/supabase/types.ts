@@ -16,47 +16,62 @@ export type Database = {
     Tables: {
       bookings: {
         Row: {
+          auto_release_at: string | null
           cancellation_reason: string | null
           cancelled_at: string | null
           commission_amount: number
           created_at: string
           driver_amount: number
           id: string
+          passenger_confirmed_at: string | null
           passenger_id: string
+          payout_status: string
+          released_at: string | null
           ride_id: string
           seats_booked: number
           status: string | null
           stripe_payment_intent_id: string | null
+          stripe_transfer_id: string | null
           total_amount: number
           updated_at: string
         }
         Insert: {
+          auto_release_at?: string | null
           cancellation_reason?: string | null
           cancelled_at?: string | null
           commission_amount: number
           created_at?: string
           driver_amount: number
           id?: string
+          passenger_confirmed_at?: string | null
           passenger_id: string
+          payout_status?: string
+          released_at?: string | null
           ride_id: string
           seats_booked: number
           status?: string | null
           stripe_payment_intent_id?: string | null
+          stripe_transfer_id?: string | null
           total_amount: number
           updated_at?: string
         }
         Update: {
+          auto_release_at?: string | null
           cancellation_reason?: string | null
           cancelled_at?: string | null
           commission_amount?: number
           created_at?: string
           driver_amount?: number
           id?: string
+          passenger_confirmed_at?: string | null
           passenger_id?: string
+          payout_status?: string
+          released_at?: string | null
           ride_id?: string
           seats_booked?: number
           status?: string | null
           stripe_payment_intent_id?: string | null
+          stripe_transfer_id?: string | null
           total_amount?: number
           updated_at?: string
         }
@@ -604,6 +619,10 @@ export type Database = {
         Args: { ride_id: string; seats_to_book: number }
         Returns: number
       }
+      freeze_booking_payout: {
+        Args: { p_booking_id: string }
+        Returns: undefined
+      }
       get_contact_info_for_booking: {
         Args: { booking_id_param: string }
         Returns: {
@@ -618,6 +637,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      mark_booking_released: {
+        Args: { p_booking_id: string; p_stripe_transfer_id: string }
+        Returns: undefined
       }
     }
     Enums: {
