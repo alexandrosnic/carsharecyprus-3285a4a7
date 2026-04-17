@@ -12,7 +12,6 @@ import { toast } from 'sonner';
 import { validateEUPhone, normalizePhone } from '@/lib/phoneValidation';
 
 const RESEND_COOLDOWN_SECONDS = 60;
-const MAX_SENDS_PER_HOUR = 3;
 
 const VerifyPhone: React.FC = () => {
   const navigate = useNavigate();
@@ -48,29 +47,13 @@ const VerifyPhone: React.FC = () => {
 
     setSending(true);
     try {
-      // Rate-limit: max N sends per hour
-      const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
-      const { count } = await supabase
-        .from('phone_otp_attempts')
-        .select('id', { count: 'exact', head: true })
-        .eq('user_id', user.id)
-        .gte('created_at', oneHourAgo);
-
-      if ((count ?? 0) >= MAX_SENDS_PER_HOUR) {
-        toast.error('Too many attempts. Please try again in an hour.');
-        return;
-      }
-
-      const { error } = await supabase.auth.updateUser({ phone: normalized });
-      if (error) {
-        toast.error(error.message);
-        return;
-      }
-
-      await supabase.from('phone_otp_attempts').insert({
-        user_id: user.id,
-        phone_number: normalized,
+      const { data, error } = await supabase.functions.invoke('send-phone-otp', {
+        body: { phone: normalized },
       });
+      if (error || (data && (data as any).error)) {
+        toast.error((data as any)?.error || error?.message || 'Failed to send code');
+        return;
+      }
 
       setStep('verify');
       setCooldown(RESEND_COOLDOWN_SECONDS);
@@ -90,29 +73,11 @@ const VerifyPhone: React.FC = () => {
     }
     setVerifying(true);
     try {
-      const normalized = normalizePhone(phone);
-      const { error } = await supabase.auth.verifyOtp({
-        phone: normalized,
-        token: otp,
-        type: 'phone_change',
+      const { data, error } = await supabase.functions.invoke('verify-phone-otp', {
+        body: { code: otp },
       });
-      if (error) {
-        toast.error(error.message);
-        return;
-      }
-
-      // Mark profile as verified
-      const { error: pErr } = await supabase
-        .from('profiles')
-        .update({
-          phone_number: normalized,
-          phone_verified: true,
-          phone_verified_at: new Date().toISOString(),
-        } as any)
-        .eq('user_id', user.id);
-
-      if (pErr) {
-        toast.error('Verified, but failed to update profile: ' + pErr.message);
+      if (error || (data && (data as any).error)) {
+        toast.error((data as any)?.error || error?.message || 'Verification failed');
         return;
       }
 
