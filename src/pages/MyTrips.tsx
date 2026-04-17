@@ -24,6 +24,8 @@ interface Trip {
   booking_status?: string;
   seats_booked?: number;
   total_amount?: number;
+  payout_status?: string;
+  passenger_confirmed_at?: string | null;
   other_party?: {
     full_name: string;
     avatar_url: string;
