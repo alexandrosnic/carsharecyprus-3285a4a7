@@ -110,9 +110,14 @@ All colors MUST be HSL.
     color-scheme: dark;
   }
 
+  html {
+    font-family: 'Nunito', system-ui, -apple-system, sans-serif;
+  }
+
   body {
     @apply bg-background text-foreground;
     min-height: 100vh;
+    font-family: 'Nunito', system-ui, -apple-system, sans-serif;
   }
 
   #root {
