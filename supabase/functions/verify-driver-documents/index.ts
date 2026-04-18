@@ -9,9 +9,10 @@ const corsHeaders = {
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
-const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
+const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY")!;
 
-const AI_GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
+const OPENAI_URL = "https://api.openai.com/v1/chat/completions";
+const OPENAI_MODEL = "gpt-4o";
 
 // Threshold for auto-approval (all 4 boolean checks must pass + score >= this)
 const AUTO_APPROVE_SCORE = 0.85;
@@ -162,14 +163,14 @@ License & plate match if normalized strings (no spaces, uppercase) are identical
 Image 1 = driver's license. Image 2 = vehicle photo (look for plate).
 Extract and compare. Return result via the verify_documents tool.`;
 
-    const aiResp = await fetch(AI_GATEWAY_URL, {
+    const aiResp = await fetch(OPENAI_URL, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        Authorization: `Bearer ${OPENAI_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-pro",
+        model: OPENAI_MODEL,
         messages: [
           { role: "system", content: systemPrompt },
           {
@@ -236,19 +237,24 @@ Extract and compare. Return result via the verify_documents tool.`;
 
     if (!aiResp.ok) {
       const txt = await aiResp.text();
-      console.error("AI gateway error:", aiResp.status, txt);
+      console.error("OpenAI error:", aiResp.status, txt);
       if (aiResp.status === 429) {
-        return new Response(JSON.stringify({ error: "AI rate limit, try later" }), {
+        return new Response(JSON.stringify({ error: "OpenAI rate limit, try later" }), {
           status: 429,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      if (aiResp.status === 402) {
-        return new Response(JSON.stringify({ error: "AI credits exhausted" }), {
-          status: 402,
+      if (aiResp.status === 401) {
+        return new Response(JSON.stringify({ error: "OpenAI auth failed (check API key)" }), {
+          status: 500,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
+      return new Response(JSON.stringify({ error: "AI verification failed" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
       return new Response(JSON.stringify({ error: "AI verification failed" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
