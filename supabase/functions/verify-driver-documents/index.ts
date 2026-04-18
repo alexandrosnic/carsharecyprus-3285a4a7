@@ -9,9 +9,10 @@ const corsHeaders = {
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
-const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
+const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY")!;
 
-const AI_GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
+const OPENAI_URL = "https://api.openai.com/v1/chat/completions";
+const OPENAI_MODEL = "gpt-4o";
 
 // Threshold for auto-approval (all 4 boolean checks must pass + score >= this)
 const AUTO_APPROVE_SCORE = 0.85;
@@ -162,14 +163,14 @@ License & plate match if normalized strings (no spaces, uppercase) are identical
 Image 1 = driver's license. Image 2 = vehicle photo (look for plate).
 Extract and compare. Return result via the verify_documents tool.`;
 
-    const aiResp = await fetch(AI_GATEWAY_URL, {
+    const aiResp = await fetch(OPENAI_URL, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        Authorization: `Bearer ${OPENAI_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-pro",
+        model: OPENAI_MODEL,
         messages: [
           { role: "system", content: systemPrompt },
           {
