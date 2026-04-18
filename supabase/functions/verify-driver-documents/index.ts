@@ -237,19 +237,24 @@ Extract and compare. Return result via the verify_documents tool.`;
 
     if (!aiResp.ok) {
       const txt = await aiResp.text();
-      console.error("AI gateway error:", aiResp.status, txt);
+      console.error("OpenAI error:", aiResp.status, txt);
       if (aiResp.status === 429) {
-        return new Response(JSON.stringify({ error: "AI rate limit, try later" }), {
+        return new Response(JSON.stringify({ error: "OpenAI rate limit, try later" }), {
           status: 429,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      if (aiResp.status === 402) {
-        return new Response(JSON.stringify({ error: "AI credits exhausted" }), {
-          status: 402,
+      if (aiResp.status === 401) {
+        return new Response(JSON.stringify({ error: "OpenAI auth failed (check API key)" }), {
+          status: 500,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
+      return new Response(JSON.stringify({ error: "AI verification failed" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
       return new Response(JSON.stringify({ error: "AI verification failed" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
