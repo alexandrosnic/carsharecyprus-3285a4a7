@@ -177,6 +177,9 @@ export type Database = {
       driver_verifications: {
         Row: {
           admin_notes: string | null
+          ai_verification_result: Json | null
+          ai_verification_score: number | null
+          ai_verified_at: string | null
           created_at: string
           driver_id: string
           id: string
@@ -192,6 +195,9 @@ export type Database = {
         }
         Insert: {
           admin_notes?: string | null
+          ai_verification_result?: Json | null
+          ai_verification_score?: number | null
+          ai_verified_at?: string | null
           created_at?: string
           driver_id: string
           id?: string
@@ -207,6 +213,9 @@ export type Database = {
         }
         Update: {
           admin_notes?: string | null
+          ai_verification_result?: Json | null
+          ai_verification_score?: number | null
+          ai_verified_at?: string | null
           created_at?: string
           driver_id?: string
           id?: string
