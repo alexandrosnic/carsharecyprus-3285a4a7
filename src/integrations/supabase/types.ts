@@ -23,14 +23,20 @@ export type Database = {
           created_at: string
           driver_amount: number
           id: string
+          no_show_reported_at: string | null
+          no_show_reported_by: string | null
+          no_show_type: string | null
           passenger_confirmed_at: string | null
           passenger_id: string
           payout_status: string
+          refund_amount: number | null
+          refund_status: string | null
           released_at: string | null
           ride_id: string
           seats_booked: number
           status: string | null
           stripe_payment_intent_id: string | null
+          stripe_refund_id: string | null
           stripe_transfer_id: string | null
           total_amount: number
           updated_at: string
@@ -43,14 +49,20 @@ export type Database = {
           created_at?: string
           driver_amount: number
           id?: string
+          no_show_reported_at?: string | null
+          no_show_reported_by?: string | null
+          no_show_type?: string | null
           passenger_confirmed_at?: string | null
           passenger_id: string
           payout_status?: string
+          refund_amount?: number | null
+          refund_status?: string | null
           released_at?: string | null
           ride_id: string
           seats_booked: number
           status?: string | null
           stripe_payment_intent_id?: string | null
+          stripe_refund_id?: string | null
           stripe_transfer_id?: string | null
           total_amount: number
           updated_at?: string
@@ -63,14 +75,20 @@ export type Database = {
           created_at?: string
           driver_amount?: number
           id?: string
+          no_show_reported_at?: string | null
+          no_show_reported_by?: string | null
+          no_show_type?: string | null
           passenger_confirmed_at?: string | null
           passenger_id?: string
           payout_status?: string
+          refund_amount?: number | null
+          refund_status?: string | null
           released_at?: string | null
           ride_id?: string
           seats_booked?: number
           status?: string | null
           stripe_payment_intent_id?: string | null
+          stripe_refund_id?: string | null
           stripe_transfer_id?: string | null
           total_amount?: number
           updated_at?: string
@@ -778,6 +796,10 @@ export type Database = {
       }
       mark_booking_released: {
         Args: { p_booking_id: string; p_stripe_transfer_id: string }
+        Returns: undefined
+      }
+      report_no_show: {
+        Args: { p_booking_id: string; p_no_show_type: string }
         Returns: undefined
       }
     }
