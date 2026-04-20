@@ -597,7 +597,7 @@ const MyTrips = () => {
                                   Report a Problem
                                 </Button>
                               )}
-                              {trip.type === 'passenger' && trip.booking_status !== 'cancelled' && new Date(trip.departure_time) > new Date() && (
+                              {trip.type === 'passenger' && new Date(trip.departure_time) > new Date() && (
                                 <Button
                                   size="sm"
                                   variant="destructive"
