@@ -230,25 +230,52 @@ const MyTrips = () => {
     }
   };
 
-  const handleCancelBooking = async (bookingId: string) => {
-    if (!confirm('Are you sure you want to cancel this booking?')) return;
-    try {
-      const { error } = await supabase
-        .from('bookings')
-        .update({ 
-          status: 'cancelled',
-          cancelled_at: new Date().toISOString(),
-          cancellation_reason: 'Cancelled by passenger'
-        })
-        .eq('id', bookingId)
-        .eq('passenger_id', user?.id);
+  const handleCancelBooking = async (bookingId: string, departureTime: string, totalAmount: number) => {
+    // Compute refund preview matching backend tiers
+    const hours = (new Date(departureTime).getTime() - Date.now()) / (1000 * 60 * 60);
+    let pct = 0;
+    if (hours > 24) pct = 1;
+    else if (hours > 2) pct = 0.5;
+    const refund = (totalAmount * pct).toFixed(2);
+    const tierMsg =
+      pct === 1 ? `You'll receive a full refund of €${refund} (>24h before departure).`
+      : pct === 0.5 ? `You'll receive a 50% refund of €${refund} (2-24h before departure).`
+      : `No refund — cancellations under 2h from departure are non-refundable.`;
 
+    if (!confirm(`Cancel this booking?\n\n${tierMsg}`)) return;
+    try {
+      const { data, error } = await supabase.functions.invoke('cancel-booking', {
+        body: { booking_id: bookingId },
+      });
       if (error) throw error;
-      toast.success('Booking cancelled');
+      if ((data as any)?.error) throw new Error((data as any).error);
+      const r = data as { refund_amount: number; refund_status: string };
+      toast.success(
+        r.refund_amount > 0
+          ? `Booking cancelled. €${r.refund_amount.toFixed(2)} refunded.`
+          : 'Booking cancelled. No refund applies.'
+      );
       fetchTrips();
     } catch (error: any) {
       console.error('Error cancelling booking:', error);
-      toast.error('Failed to cancel booking');
+      toast.error('Failed to cancel: ' + error.message);
+    }
+  };
+
+  const handleReportNoShow = async (bookingId: string, type: 'driver' | 'passenger') => {
+    const who = type === 'driver' ? 'driver' : 'passenger';
+    if (!confirm(`Report that the ${who} did not show up?\n\nThis will freeze the payout and notify our admin team to review.`)) return;
+    try {
+      const { data, error } = await supabase.functions.invoke('report-no-show', {
+        body: { booking_id: bookingId, no_show_type: type },
+      });
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+      toast.success('No-show reported. Our team will review and contact you.');
+      fetchTrips();
+    } catch (error: any) {
+      console.error('Error reporting no-show:', error);
+      toast.error('Failed to report: ' + error.message);
     }
   };
 
