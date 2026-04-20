@@ -568,6 +568,20 @@ const MyTrips = () => {
                                   Payment released
                                 </Badge>
                               )}
+                              {/* Report no-show: only after departure, only for confirmed bookings, before release */}
+                              {trip.booking_status === 'confirmed'
+                                && trip.payout_status !== 'released'
+                                && new Date(trip.departure_time) <= new Date() && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="border-destructive/50 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                                  onClick={() => handleReportNoShow(trip.id, trip.type === 'driver' ? 'passenger' : 'driver')}
+                                >
+                                  <AlertCircle className="h-4 w-4 mr-1" />
+                                  Report no-show
+                                </Button>
+                              )}
                               {/* Report a Problem: confirmed bookings, before payout released, within 24h after departure */}
                               {trip.booking_status === 'confirmed'
                                 && trip.payout_status !== 'released'
@@ -583,14 +597,16 @@ const MyTrips = () => {
                                   Report a Problem
                                 </Button>
                               )}
-                              <Button
-                                size="sm"
-                                variant="destructive"
-                                onClick={() => handleCancelBooking(trip.id)}
-                              >
-                                <Ban className="h-4 w-4 mr-1" />
-                                Cancel Booking
-                              </Button>
+                              {trip.type === 'passenger' && trip.booking_status !== 'cancelled' && new Date(trip.departure_time) > new Date() && (
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  onClick={() => handleCancelBooking(trip.id, trip.departure_time, trip.total_amount ?? 0)}
+                                >
+                                  <Ban className="h-4 w-4 mr-1" />
+                                  Cancel Booking
+                                </Button>
+                              )}
                             </div>
                           </div>
                         )}
